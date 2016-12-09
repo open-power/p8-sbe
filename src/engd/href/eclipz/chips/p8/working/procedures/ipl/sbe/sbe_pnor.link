@@ -1,0 +1,98 @@
+// $Id: sbe_pnor.link,v 1.14 2012/03/02 15:10:36 bcbrock Exp $
+
+// This linker script creates a binary SBE-PNOR image. This is the SBE-IPL or
+// CENTAUR code and data only - not the entire PNOR image. This script is
+// processed by cpp.
+
+#include "sbe_link.H"
+
+// Need to undefine these so that output formats are not modified!
+#undef powerpc
+#undef pore
+
+#ifdef PGAS_PPC
+OUTPUT_FORMAT(elf32-powerpc);
+#else
+OUTPUT_FORMAT(elf64-pore);
+#endif
+
+//  Define the beginning of the image and the amount of storage available.
+//  SBE-PNOR code images are always linked at a static location and then
+//  relocated using the hardware relocation capability of the PORE engine.
+
+#define origin           SBE_PNOR_ORIGIN
+#define memory_available SBE_PNOR_SIZE
+
+// The MEMORY command is included simply in order to get linker messages about
+// overflowing sections.  The values below have to be manifest constants.
+
+MEMORY
+{
+    sbe_pnor : ORIGIN = origin, LENGTH = memory_available
+}
+
+
+// All sections are 128-byte aligned.  The linker will pad short sections with
+// 0.  The linker script syntax is unusual in the output section description
+// _must not_ end in a semicolon.
+
+#define ALIGN_SECTION(n) . = ALIGN(n);
+
+#define DEFSECTION(section, align)                      \
+    ALIGN_SECTION(align)                                \
+    _##section##_origin = .;                            \
+    _##section##_offset = . - _sbe_pnor_origin;         \
+    .section . : { *(.section) } > sbe_pnor             \
+    _##section##_size = . - _##section##_origin;
+
+
+SECTIONS
+{
+    . = origin;
+    _sbe_pnor_origin = .;
+
+    // The .header is always linked first.
+
+    DEFSECTION(header, 1)
+
+    // General PORE data (8-byte aligned)
+
+    DEFSECTION(pore_data, 8)
+
+    // SLW text
+    //
+    // The .slw_text goes next so that it is contiguous with and will remain
+    // statically linked with the .pore_data section regardless of how the
+    // other relocatable sections are arranged at run-time.
+
+    DEFSECTION(slw_text, 4)
+
+    // TOC data, TOC ID strings and string meta-data
+    //
+    //  After normalization, these sections are fully relocatable and also
+    //  easily expanded.
+    //
+    // TBD: Consider merging .strings and .toc_strings if we decide to leave
+    // .toc_strings in the final image.
+
+    DEFSECTION(toc_data, 4)
+    DEFSECTION(toc_strings, 1)
+    DEFSECTION(strings, 1)
+
+    // These sections are not needed for SLW restore, and may simply be
+    // eliminated from the image when it is copied to mainstore.
+    //
+    // .ipl_text : Text required only for the initial IPL
+    // .cen_text : Text required only for Centaur IPL
+
+    DEFSECTION(ipl_text, 4)
+    DEFSECTION(cen_text, 4)
+
+    // We require the size of the image to be a multiple of 8 bytes to
+    // guarantee that a fetch of the last address (in the PoreVe) will always
+    // be able to return 8 bytes.
+
+    . = ALIGN(8);
+    _sbe_pnor_size = . - _sbe_pnor_origin;
+    _sbe_pnor_end = .;
+}

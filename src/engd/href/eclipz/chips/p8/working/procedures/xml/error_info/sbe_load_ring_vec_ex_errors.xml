@@ -1,0 +1,97 @@
+<!-- $Id: sbe_load_ring_vec_ex_errors.xml,v 1.4 2014/07/23 19:51:50 jmcgill Exp $ -->
+<!-- Error definitions for sbe_load_ring_vec_ex procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LOAD_RING_VEC_EX_ex_time_core_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_ex_core_gptr_time_initf
+      Failed to find a chiplet to scan for ex_time_core
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LOAD_RING_VEC_EX_ex_time_eco_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_ex_gptr_time_initf
+      Failed to find a chiplet to scan for ex_time_eco
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LOAD_RING_VEC_EX_ex_repr_core_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_ex_core_repair_initf
+      Failed to find a chiplet to scan for ex_repr_core
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_LOAD_RING_VEC_EX_ex_repr_eco_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_ex_repair_initf
+      Failed to find a chiplet to scan for ex_repr_eco
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SELECT_EX</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+</hwpErrors>

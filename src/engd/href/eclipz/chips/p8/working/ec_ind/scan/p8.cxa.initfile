@@ -1,0 +1,65 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Required keywords/variables
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#-----------------------------------------------------------------------
+#idial  How many hang polls that need to be detected before sending the hang poll to the logic.
+#       0b0000 means send every hang poll to logic
+#  reset value : 0b0000
+#-----------------------------------------------------------------------
+ispy  EN.NX.CXA.CXA_APC0.HANG.HANG_POLL_SCALE      [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  0b0000;
+}
+
+# HW297142 - mask snooper epoch timeout
+ispy EN.NX.CXA.CXA_SNPFE.SNP_REGS.CXA_SNP_C_ERR_RPT_MASK [when=L && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  bits, spyv;
+  28,   0b1;
+}
+
+# bypass PSL command queues for Naples
+espy EN.NX.CXA(0,1).APC_PSL_CMD_QUEUE_DISABLE_ENQUEUE [when=L && (PU_CHIP_TYPE == NAPLES)] {
+  spyv;
+  ON;
+}
+
+espy EN.NX.CXA(0,1).APC_PSL_CMD_QUEUE_DISABLE_DEQUEUE [when=L && (PU_CHIP_TYPE == NAPLES)] {
+  spyv;
+  ON;
+}
+

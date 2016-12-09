@@ -1,0 +1,8 @@
+<!-- $Id: proc_pibmem_registers.xml,v 1.1 2013/04/25 19:54:23 jeshua Exp $ -->
+<!-- Definition of PIBMEM registers to collect on some errors -->
+<hwpErrors>
+  <registerFfdc>
+    <id>REG_FFDC_PROC_PIBMEM_REGISTERS</id>
+    <scomRegister>PIBMEM_STATUS_0x00088005</scomRegister>
+  </registerFfdc>
+</hwpErrors>

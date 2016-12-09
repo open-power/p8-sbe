@@ -1,0 +1,336 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--------------------------------------------------------------------------------
+# Required keywords/variables
+#--------------------------------------------------------------------------------
+SyntaxVersion = 1
+ChipUnitHierarchy[CORE] = EHP
+
+
+#--------------------------------------------------------------------------------
+# Defines
+#--------------------------------------------------------------------------------
+
+define def_SAFE_MODE            = (IPLMODE == HBI);
+define def_CORE_FLOOR_RATIO_8_8 = ((pu_ex_dpll_freq) >= (2 * pu_nest_freq));
+define def_CORE_FLOOR_RATIO_7_8 = ((4 * pu_ex_dpll_freq) >= (7 * pu_nest_freq));
+define def_CORE_FLOOR_RATIO_6_8 = ((2 * pu_ex_dpll_freq) >= (3 * pu_nest_freq));
+define def_CORE_FLOOR_RATIO_5_8 = ((4 * pu_ex_dpll_freq) >= (5 * pu_nest_freq));
+define def_CORE_FLOOR_RATIO_4_8 = (pu_ex_dpll_freq >= pu_nest_freq);
+define def_CORE_FLOOR_RATIO_2_8 = ((2 * pu_ex_dpll_freq) >= pu_nest_freq);
+
+
+#--------------------------------------------------------------------------------
+# Inits
+#--------------------------------------------------------------------------------
+
+# cmd_c2i_dval_launch
+espy EHP.PB_CFG_CMD_DVAL_LAUNCH [when=L] {
+    spyv,   expr;
+    WC_P1,  (def_SAFE_MODE == 1);
+       WC,  (def_CORE_FLOOR_RATIO_8_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_7_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_6_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_5_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_4_8 == 1);
+    WC_P1,  (def_CORE_FLOOR_RATIO_2_8 == 1);
+}
+
+espy EHP.PB_CFG_CMD_DVAL_LAUNCH_NEXT [when=L] {
+    spyv,   expr;
+    WC_P1,  (def_SAFE_MODE == 1);
+       WC,  (def_CORE_FLOOR_RATIO_8_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_7_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_6_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_5_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_4_8 == 1);
+    WC_P1,  (def_CORE_FLOOR_RATIO_2_8 == 1);
+}
+
+# cmd_c2i_early_req_mode
+espy EHP.PB_CFG_CMD_EARLY_PBI_REQ_EN [when=L] {
+    spyv;
+    OFF;
+}
+
+espy EHP.PB_CFG_CMD_EARLY_PBI_REQ_EN_NEXT [when=L] {
+    spyv;
+    OFF;
+}
+
+# cmd_c2i_spare_mode
+espy EHP.EX.CMD(0,1)_C2I_SND_CTL.CFG_SPARE_MODE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# prsp_c2i_dval_launch
+espy EHP.PB_CFG_PRSP_DVAL_LAUNCH [when=L] {
+    spyv;
+    WC_P1;
+}
+
+espy EHP.PB_CFG_PRSP_DVAL_LAUNCH_NEXT [when=L] {
+    spyv;
+    WC_P1;
+}
+
+# prsp_c2i_hshake
+espy EHP.PB_CFG_PRSP_HSHAKE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+espy EHP.PB_CFG_PRSP_HSHAKE_NEXT [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# prsp_c2i_spare_mode
+espy EHP.EX.PRSP(0,1)_C2I_SND_CTL.CFG_SPARE_MODE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# crsp_i2c_done_launch
+espy EHP.PB_CFG_CRSP_DONE_LAUNCH [when=L] {
+    spyv,   expr;
+    RC_P1,  (def_SAFE_MODE == 1);
+    RC,     any;
+}
+
+espy EHP.PB_CFG_CRSP_DONE_LAUNCH_NEXT [when=L] {
+    spyv,   expr;
+    RC_P1,  (def_SAFE_MODE == 1);
+    RC,     any;
+}
+
+# crsp_i2c_pty_rd_capture
+espy EHP.PB_CFG_CRSP_PTY_RD_CAPTURE [when=L] {
+    spyv,   expr;
+    RC,     (def_SAFE_MODE == 1);
+    RC_P1,  any;
+}
+
+espy EHP.PB_CFG_CRSP_PTY_RD_CAPTURE_NEXT [when=L] {
+    spyv,   expr;
+    RC,     (def_SAFE_MODE == 1);
+    RC_P1,  any;
+}
+
+# crsp_i2c_spare mode
+espy EHP.EX.CRSP(0,1)_I2C_RCV_CTL.CFG_SPARE_MODE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# data_i2c_done_launch
+espy EHP.PB_CFG_DAT_I2C_DONE_LAUNCH [when=L] {
+    spyv,   expr;
+    RC_P1,  (def_SAFE_MODE == 1);
+    RC_M1,  any;
+}
+
+espy EHP.PB_CFG_DAT_I2C_DONE_LAUNCH_NEXT [when=L] {
+    spyv,   expr;
+    RC_P1,  (def_SAFE_MODE == 1);
+    RC_M1,  any;
+}
+
+# data_i2c_dctr_launch
+espy EHP.PB_CFG_DAT_I2C_DCTR_LAUNCH [when=L] {
+    spyv,   expr;
+    RC_P1,  (def_SAFE_MODE == 1);
+    RC_M2,  (def_CORE_FLOOR_RATIO_8_8 == 1);
+    RC_M2,  (def_CORE_FLOOR_RATIO_7_8 == 1);
+    RC_M2,  (def_CORE_FLOOR_RATIO_6_8 == 1);
+    RC_M2,  (def_CORE_FLOOR_RATIO_5_8 == 1);
+    RC_M1,  (def_CORE_FLOOR_RATIO_4_8 == 1);
+       RC,  (def_CORE_FLOOR_RATIO_2_8 == 1);
+}
+
+espy EHP.PB_CFG_DAT_I2C_DCTR_LAUNCH_NEXT [when=L] {
+    spyv,   expr;
+    RC_P1,  (def_SAFE_MODE == 1);
+    RC_M2,  (def_CORE_FLOOR_RATIO_8_8 == 1);
+    RC_M2,  (def_CORE_FLOOR_RATIO_7_8 == 1);
+    RC_M2,  (def_CORE_FLOOR_RATIO_6_8 == 1);
+    RC_M2,  (def_CORE_FLOOR_RATIO_5_8 == 1);
+    RC_M1,  (def_CORE_FLOOR_RATIO_4_8 == 1);
+       RC,  (def_CORE_FLOOR_RATIO_2_8 == 1);
+}
+
+# data_i2c_spare mode
+espy EHP.EX.DATA0_I2C_RCV_CTL.CFG_SPARE_MODE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# data_c2i_dval_launch
+espy EHP.PB_CFG_DAT_C2I_DVAL_LAUNCH [when=L] {
+    spyv,   expr;
+    WC_P1,  (def_SAFE_MODE == 1);
+    WC_M1,  (def_CORE_FLOOR_RATIO_8_8 == 1);
+    WC_M1,  (def_CORE_FLOOR_RATIO_7_8 == 1);
+    WC_M1,  (def_CORE_FLOOR_RATIO_6_8 == 1);
+    WC_M1,  (def_CORE_FLOOR_RATIO_5_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_4_8 == 1);
+    WC_P1,  (def_CORE_FLOOR_RATIO_2_8 == 1);
+}
+
+espy EHP.PB_CFG_DAT_C2I_DVAL_LAUNCH_NEXT [when=L] {
+    spyv,   expr;
+    WC_P1,  (def_SAFE_MODE == 1);
+    WC_M1,  (def_CORE_FLOOR_RATIO_8_8 == 1);
+    WC_M1,  (def_CORE_FLOOR_RATIO_7_8 == 1);
+    WC_M1,  (def_CORE_FLOOR_RATIO_6_8 == 1);
+    WC_M1,  (def_CORE_FLOOR_RATIO_5_8 == 1);
+       WC,  (def_CORE_FLOOR_RATIO_4_8 == 1);
+    WC_P1,  (def_CORE_FLOOR_RATIO_2_8 == 1);
+}
+
+# data_c2i_dreq_launch
+espy EHP.PB_CFG_DAT_C2I_DREQ_LAUNCH [when=L] {
+    spyv;
+    REQ_D3;
+}
+
+espy EHP.PB_CFG_DAT_C2I_DREQ_LAUNCH_NEXT [when=L] {
+    spyv;
+    REQ_D3;
+}
+
+# data_c2i_spare mode
+espy EHP.EX.DATA0_C2I_SND_CTL.CFG_SPARE_MODE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# rcmd_i2c_done_launch
+espy EHP.PB_CFG_RCMD_DONE_LAUNCH [when=L] {
+    spyv,   expr;
+    RC_P1,  (def_SAFE_MODE == 1);
+    RC,     any;
+}
+
+espy EHP.PB_CFG_RCMD_DONE_LAUNCH_NEXT [when=L] {
+    spyv,   expr;
+    RC_P1,  (def_SAFE_MODE == 1);
+    RC,     any;
+}
+
+# rcmd_i2c_l3_not_use_dcbfl
+espy EHP.PB_CFG_L3_NOT_USE_DCBFL [when=L] {
+    spyv;
+    OFF;
+}
+
+espy EHP.PB_CFG_L3_NOT_USE_DCBFL_NEXT [when=L] {
+    spyv;
+    OFF;
+}
+
+# rcmd_i2c_pty_rd_capture
+espy EHP.PB_CFG_RCMD_PTY_RD_CAPTURE [when=L] {
+    spyv,   expr;
+    RC,     (def_SAFE_MODE == 1);
+    RC_P1,  any;
+}
+
+espy EHP.PB_CFG_RCMD_PTY_RD_CAPTURE_NEXT [when=L] {
+    spyv,   expr;
+    RC,     (def_SAFE_MODE == 1);
+    RC_P1,  any;
+}
+
+# rcmd_i2c_pty_inject
+espy EHP.PB_CFG_PTY_INJECT [when=L] {
+    spyv;
+    OFF;
+}
+
+espy EHP.PB_CFG_PTY_INJECT_NEXT [when=L] {
+    spyv;
+    OFF;
+}
+
+# rcmd_i2c_spare_mode
+espy EHP.EX.RCMD(0,1)_I2C_RCV_CTL.CFG_SPARE_MODE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# fp_i2c_done_launch
+espy EHP.PB_CFG_FP_I2CRCTL_DONE_LAUNCH [when=L] {
+    spyv;
+    RC_P1;
+}
+
+espy EHP.PB_CFG_FP_I2CRCTL_DONE_LAUNCH_NEXT [when=L] {
+    spyv;
+    RC_P1;
+}
+
+# fp_i2c_pty_rd_capture
+espy EHP.PB_CFG_FP_PTY_RD_CAPTURE [when=L] {
+    spyv;
+    RC;
+}
+
+espy EHP.PB_CFG_FP_PTY_RD_CAPTURE_NEXT [when=L] {
+    spyv;
+    RC;
+}
+
+# fp_i2c_spare_mode
+espy EHP.EX.FP_I2C_RCV_CTL.CFG_SPARE_MODE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# fp_c2i_dval_launch
+espy EHP.PB_CFG_FP_C2ISCTL_DVAL_LAUNCH [when=L] {
+    spyv;
+    WC_P1;
+}
+
+espy EHP.PB_CFG_FP_C2ISCTL_DVAL_LAUNCH_NEXT [when=L] {
+    spyv;
+    WC_P1;
+}
+
+# fp_c2i_hshake
+espy EHP.EX.FP_C2I_SND_CTL.CFG_HSHAKE [when=L] {
+    spyv;
+    DISABLE;
+}
+
+# fp_c2i_spare_mode
+espy EHP.EX.FP_C2I_SND_CTL.CFG_SPARE_MODE [when=L] {
+    spyv;
+    DISABLE;
+}

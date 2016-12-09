@@ -1,0 +1,141 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 1
+
+
+#--******************************************************************************
+#-- scan workarounds
+#--******************************************************************************
+
+# HW253526 - adjustment to flush state required for default PCIE trace compression
+
+# trace array setup
+ispy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L] {
+    bits,    spyv;
+    0:63,    0x0000000000000010;
+    64:87,   0x000000;
+}
+
+espy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCHA_MUXSEL [when=L] {
+    spyv;
+    BITS_24_TO_47;
+}
+
+espy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCHB_MUXSEL [when=L] {
+    spyv ;
+    BITS_48_TO_71;
+}
+
+ispy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKA [when=L] {
+    spyv;
+    # 222222333333333344444444
+    # 456789012345678901234567
+    0b011111111111111111111111;
+}
+
+ispy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.PATTERNA [when=L] {
+    spyv;
+    # 222222333333333344444444
+    # 456789012345678901234567
+    0b100000000000000000000000;
+}
+
+ispy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKB [when=L] {
+    spyv;
+    # 445555555555666666666677
+    # 890123456789012345678901
+    0b111111111111111111110111;
+}
+
+ispy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.PATTERNB [when=L] {
+    spyv;
+    # 445555555555666666666677
+    # 890123456789012345678901
+    0b000000000000000000001000;
+}
+
+ispy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.TRIG0_AND_MASK [when=L] {
+    spyv;
+    0b0000;
+}
+
+ispy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.TRIG0_OR_MASK [when=L] {
+    spyv;
+    0b0000;
+}
+
+ispy ES.PE_WRAP_TOP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCH_NOT_MODE [when=L] {
+    spyv;
+    0b0000;
+}
+
+espy ES.PE_WRAP_TOP.TPC.TRA.TR.CTRL.LEAF.COMP.STORE_ON_TRIG_MODE [when=L] {
+    spyv;
+    OFF;
+}
+
+espy ES.PE_WRAP_TOP.TPC.TRA.TR.CTRL.LEAF.COMP.ENH_TRACE_MODE [when=L] {
+    spyv;
+    OFF;
+}
+
+
+# HW222178 - disable clock gate to enable proper BAR setup relative to ETU reset
+ispy ES.PE_WRAP_TOP.PE(0,1,2).PH3_TOP.ETU.PVS.LCBCNT_HW222178.ACT_DIS [when=L && (((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)) || (PU_CHIP_TYPE == VENICE))] {
+    spyv;
+    0b1;
+}
+
+
+# HW235450 : DMA Write data is not forwarded on PB after a freeze recovery 
+ispy ES.PE_WRAP_TOP.PE(0,1,2).PEPBCQ.PBCQ.LCBCNTL2.ACT_DIS [when=L && ((PU_CHIP_TYPE == MURANO) && (ec < 0x20))] {
+    spyv;
+    0b1;
+}
+
+# Disable the tristate drivers in IOP to keep IPL current draw from exceeding
+# max supply capability
+espy IOP_TRISTATE_DRIVER [when=L && ((PU_CHIP_TYPE == MURANO) && (ec < 0x20))] {
+    spyv;
+    DISABLE;
+}
+
+# HW281118 - P8 - can not change between CAPP mode and non-CAPP mode - clock gating
+ispy ES.PE_WRAP_TOP.PE(0,1,2).PEPBCQ.PBCQ.LCBCNTL10.ACT_DIS [when=L && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+    spyv;
+    0b1;
+}
+
+# HW249158 - P8 - disable function for speculation request against RBA interrupts - (HW282171 bloomberg issue)
+espy ES.PE_WRAP_TOP.PE(0,1,2).PH3_TOP.ETU.PE_DISABLE_HW249158_LKP [when=L && (((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)) || (PU_CHIP_TYPE == VENICE) && (ec >= 0x20))] {
+    spyv;
+    ON;
+}

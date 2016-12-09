@@ -1,0 +1,164 @@
+#!/usr/bin/perl
+
+# IBM_PROLOG_BEGIN_TAG                                                   
+# This is an automatically generated prolog.                             
+#                                                                        
+# OpenPOWER Project                                             
+#                                                                        
+# Contributors Listed Below - COPYRIGHT 2012,2016                        
+# [+] International Business Machines Corp.                              
+#                                                                        
+#                                                                        
+# Licensed under the Apache License, Version 2.0 (the "License");        
+# you may not use this file except in compliance with the License.       
+# You may obtain a copy of the License at                                
+#                                                                        
+#     http://www.apache.org/licenses/LICENSE-2.0                         
+#                                                                        
+# Unless required by applicable law or agreed to in writing, software    
+# distributed under the License is distributed on an "AS IS" BASIS,      
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        
+# implied. See the License for the specific language governing           
+# permissions and limitations under the License.                         
+#                                                                        
+# IBM_PROLOG_END_TAG                                                     
+
+
+
+
+use strict;
+use warnings;
+use Getopt::Std;
+
+my $prcdName;
+my $ecmdRelease = "$ENV{ECMD_RELEASE}";
+my $xtraDefines = "";
+my $depSource_c = "";
+my $depSource_cpp = "";
+
+# help/usage message
+sub
+usage()
+{
+  printf("\n");
+  printf("Syntax: buildecmdprcd [<options>] <procedure_name> \n");
+  printf("\n");
+  printf("Required arguments:\n");
+  printf("    <procedure_name>  Target eCMD procedure source file to build (from current directory).\n");
+  printf("                      .C extension is assumed, and may be omitted if desired.\n");
+  printf("Options:\n");
+  printf("    -h                Display this help message.\n");
+  printf("    -r<level>         Override eCMD level for build (default=\"$ecmdRelease\").\n");
+  printf("    -C<list>          Comma separated list of dependent source files to build (from current directory).\n");
+  printf("                      .C extension is assumed, and may be omitted if desired.\n");
+  printf("                      (ex., \'-C \"procedure_libs1.C,procedure_libs2.C\"\')\n");
+  printf("    -d<list>          Same behavior as -C.\n");
+  printf("    -c<list>          Comma separated list of dependent c (non-cpp) source files to build.\n");
+  printf("                      .c extension is assumed, and may be omitted if desired.\n");
+  printf("                      (ex., \'-c \"procedure_libs1.c,procedure_libs2.c\"\')\n");
+  printf("    -u<list>          Comma separated list of defines.\n");
+  printf("                      (ex., \'-u \"MY_DEBUG_1,VERBOSE_LEVEL2\"\')\n");
+  printf("\n");
+}
+ 
+
+# parse command line flags
+my %options;
+if (!getopts("h:r:C:d:c:u:", \%options)) {
+  printf("Unsupported/unknown option flags detected!\n");
+  usage();
+  exit 1;
+}
+if (defined($options{'h'})) {
+  usage();
+  exit 0;
+}
+if (defined($options{'r'})) {
+  $ecmdRelease = $options{'r'};
+}
+
+if (defined($options{'C'}) || defined($options{'d'})) {
+  my @depSourceList_cpp_C;
+  my @depSourceList_cpp_d;
+  if (defined($options{'C'})) {
+    @depSourceList_cpp_C = split(/\,/, $options{'C'});
+  }
+  if (defined($options{'d'})) {
+    @depSourceList_cpp_d = split(/\,/, $options{'d'});
+  }
+  my @depSourceList_cpp = (@depSourceList_cpp_C , @depSourceList_cpp_d);
+  for (my $i = 0; $i < scalar(@depSourceList_cpp); $i++) {
+    # add the .C extension if ommited 
+    if ($depSourceList_cpp[$i] !~ /\.C$/) {
+      $depSourceList_cpp[$i] .= ".C";
+    }
+    # add a space
+    $depSource_cpp .= $depSourceList_cpp[$i] . " ";
+  }
+  # allow relative path inputs for extra source files
+  $depSource_cpp =~ s/\//\\\//g;
+}
+
+if (defined($options{'c'})) {
+  my @depSourceList_c = split(/\,/, $options{'c'});
+  for (my $i = 0; $i < scalar(@depSourceList_c); $i++) {
+    # add the .c extension if ommited 
+    if ($depSourceList_c[$i] !~ /\.c$/) {
+      $depSourceList_c[$i] .= ".c";
+    }
+    # add a space
+    $depSource_c .= $depSourceList_c[$i] . " ";
+  }
+  # allow relative path inputs for extra source files
+  $depSource_c =~ s/\//\\\//g;
+}
+
+if (defined($options{'u'})) {
+  my @defineList = split(/\,/, $options{'u'});
+  for (my $i = 0; $i < scalar(@defineList); $i++) {
+  	$xtraDefines .= "-D";
+  	$xtraDefines .= $defineList[$i] . " ";
+  }
+}
+
+# grab procedure name
+if (scalar(@ARGV) != 1) {
+  printf("Expected exactly one argument (procedure name), found zero or more than one!\n");
+  usage();
+  exit 2;
+}
+else {
+  # strip .C extension for makefile substitution
+  $prcdName = $ARGV[0];
+  $prcdName =~ s/\.C$//;
+}
+
+# form sed arguments to modify demo makefile
+# always substitute procedure name for demo
+my $sedArgs = "-e 's/demo/$prcdName/g'";
+if (defined($options{'C'}) || defined($options{'d'})) {
+  # add dependent c++ source files
+  $sedArgs .= " -e \"s/XTRA_SOURCE_CPP :=/XTRA_SOURCE_CPP := $depSource_cpp/g\"";
+}
+if (defined($options{'c'})) {
+  # add dependent c source files
+  $sedArgs .= " -e \"s/XTRA_SOURCE_C   :=/XTRA_SOURCE_C   := $depSource_c/g\"";
+}
+# add defines
+$sedArgs .= " -e \"s/XTRA_DEFINES   :=/XTRA_DEFINES   := $xtraDefines/g\"";
+
+# create makefile
+if (system("sed $sedArgs makefile.ecmd.demo > makefile") != 0) {
+  printf("Error creating makefile!\n");
+  exit 3;
+}
+
+# tell user eCMD version
+printf("*** Using eCMD version $ecmdRelease\n");
+
+# build
+if (system("gmake ECMD_RELEASE=$ecmdRelease") != 0) {
+  printf("Build failed!\n");
+  exit 4;
+}
+

@@ -1,0 +1,465 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Required keywords/variables
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Defines
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+# define def_equal_test     =  (SYS.ATTR_SCRATCH_UINT32_1 == SYS.ATTR_SCRATCH_UINT32_2);
+
+# Define the number of ranks per MBS (2 MBAs) for L4 Cleaner setup
+#define def_mba01_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[0][1]);
+#define def_mba23_num_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][1]);
+#define def_num_mbs_ranks = (ATTR_EFF_NUM_RANKS_PER_DIMM[0][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[0][1] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][0] + ATTR_EFF_NUM_RANKS_PER_DIMM[1][1]);
+
+
+#--------------------------------------------------------------------------------
+# MBI/MBS Inits
+#--------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------------------------------------
+## HW244681 - DD2 enhancement : add "forward progress" wait interval to mbs hammer flush machine
+## This was to make sure mainline traffic could make fwd progress even if both MBAs were getting continuous hammer requests from both maint engine at the same time.
+## -----------------------------------------------------------------------------------------------------------------------
+espy    MBU.MBS.CFG_MBS_FLARB_PROGRESS_WINDOW_EN [when=L && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+# -----------------------------------------------------------------------------------------------------------------------
+# HW275009 - disable cache ce fir for line delete on next CE problem - workaround both DD1 and DD2
+# -----------------------------------------------------------------------------------------------------------------------
+espy    MBU.MBS.CFG_BLOCK_CACHE_CE_FIR_DIS [when=L] {
+  spyv;
+  ON;
+}
+
+# -----------------------------------------------------------------------------------------------------------------------
+# HW269130 - Disable rdtag parity check  - workaround both DD1 and DD2
+# -----------------------------------------------------------------------------------------------------------------------
+espy    MBU.MBX.HW269130_MBX_RDTAG_PARITY_CHECK [when=L] {
+  spyv;
+  MASKED;
+}
+
+## -----------------------------------------------------------------------------------------------------------------------
+## HW257437 - mask out parity error -- DD2 fix only
+## Use this dial to force the parity generator to compute correct parity
+## -----------------------------------------------------------------------------------------------------------------------
+#espy    MBU.MBS.CFG_DIR_ECC_USE_ADDPAR_DISABLE [when=L] {
+#  spyv;
+#  OFF;
+#}
+espy    MBU.MBS.CFG_DIR_ECC_USE_ADDPAR_DISABLE [when=L && (ec >= 0x20)] {
+  spyv;
+  OFF;
+}
+##espy    MBU.MBS.DIR.RAM0_DCECK.MODEPARITY [when=L && (ec < 0x20)] {
+##  spyv;
+##  ON;
+##}
+##espy    MBU.MBS.DIR.RAM1_DCECK.MODEPARITY [when=L && (ec < 0x20)] {
+##  spyv;
+##  ON;
+##}
+##espy    MBU.MBS.DIR.RAM2_DCECK.MODEPARITY [when=L && (ec < 0x20)] {
+##  spyv;
+##  ON;
+##}
+##espy    MBU.MBS.DIR.RAM3_DCECK.MODEPARITY [when=L && (ec < 0x20)] {
+##  spyv;
+##  ON;
+##}
+##espy    MBU.MBS.DIR.RAM4_DCECK.MODEPARITY [when=L && (ec < 0x20)] {
+##  spyv;
+##  ON;
+##}
+##espy    MBU.MBS.DIR.RAM5_DCECK.MODEPARITY [when=L && (ec < 0x20)] {
+##  spyv;
+##  ON;
+##}
+
+# -----------------------------------------------------------------------------------------------------------------------
+# HW244827 - mask out rxtl and cactl parity error
+# -----------------------------------------------------------------------------------------------------------------------
+espy    MBU.MBS.RXLT_XLT_PAR_ERR_MASK [when=L && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy    MBU.MBS.CACTL_XLT_PAR_ERR_MASK [when=L && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+# -----------------------------------------------------------------------------------------------------------------------
+# HW251643 - mask out IBRD parity error
+# -----------------------------------------------------------------------------------------------------------------------
+#espy    MBU.MBS.IBB.IBRD_DATA_PAR_ERR_MASK [when=L && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+# -----------------------------------------------------------------------------------------------------------------------
+# HW252381 - setup edram time ring latches
+# -----------------------------------------------------------------------------------------------------------------------
+
+espy  DD1_HW252381_EDRAM_TIME_RING_SCAN_OVERRIDE  [when=L && (ec < 0x20)] {
+  spyv;
+  DD1;
+}
+
+espy  DD1_HW252381_EDRAM_TIME_RING_SCAN_OVERRIDE_2  [when=L && (ec < 0x20)] {
+  spyv;
+  DD1;
+}
+
+# HW226417 - high/low watermarks for disabling/reenabling bypass
+# -----------------------------------------------------------------------------------------------------------------------
+#
+#espy MBU.MBS.CFG_ECC_BYPASS_DISABLE_WATERMARK [when=L && (ec < 0x20)] {
+#  spyv;
+#  HW1_LW0;
+#}
+
+# HW244276 - set default ship mode value
+# -----------------------------------------------------------------------------------------------------------------------
+
+#ispy MBU.MBS.MBS_CLN_DV_CGC_CNT_LWMARK [when=L && (ec < 0x20)] {
+#  spyv;
+#  0b00001000000000;
+#}
+
+
+# HW234590 - disable concurrent refresh
+# -----------------------------------------------------------------------------------------------------------------------
+
+espy MBU.MBS.CFG_EDRAM_CONCURRENT_REFRESH_ENABLE [when=L && (ec < 0x20)] {
+  spyv;
+  OFF;
+}
+
+# DD1 workaround for HW214303: MBS trace array debug bus does not default to downstream command
+# -----------------------------------------------------------------------------------------------------------------------
+
+# enable latches in dbgmx
+espy MBU.MBS.CFG_DBGMX_ENABLE [when=L && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+ispy  MBU.MBS.CFG_WAT0_S1D_SEL  [when=L && (ec < 0x20)] {
+  spyv   ;
+  0b00000000000 ;
+}
+
+# HW214303 make grp_bus3 default for ta0
+ispy  MBU.MBS.CFG_WAT0_S2CD_SEL  [when=L && (ec < 0x20)] {
+  spyv   ;
+  0b11111111111 ;
+}
+
+# HW214303 make grp_bus3 default for ta0
+ispy  MBU.MBS.CFG_WAT0_S3_SEL  [when=L && (ec < 0x20)] {
+  spyv   ;
+  0b11111111111 ;
+}
+
+# HW214303 make grp_bus4 default for ta1
+ispy  MBU.MBS.CFG_WAT1_S1D_SEL  [when=L && (ec < 0x20)] {
+  spyv   ;
+  0b11111111111 ;
+}
+
+# HW214303 make grp_bus4 default for ta1
+ispy  MBU.MBS.CFG_WAT1_S2CD_SEL  [when=L && (ec < 0x20)] {
+  spyv   ;
+  0b11111111111 ;
+}
+
+# HW214303 make grp_bus4 default for ta1
+ispy  MBU.MBS.CFG_WAT1_S3_SEL  [when=L && (ec < 0x20)] {
+  spyv   ;
+  0b11111111111 ;
+}
+
+
+# DD2 workaround for HW216891: It turns out only the clock gate was fixed in this defect.
+#                              The WAT enables and the default mux selects are still needed for DD2
+#
+# DD1 workaround for HW216891: Clockgating problem on the downstream bus to the debug bus
+# -----------------------------------------------------------------------------------------------------------------------
+ispy MBU.MBI.MBI.SCIC.LCBCNTL_BLK.ACT_DIS  [when=L && (ec < 0x20)] {
+  spyv;
+  0b1;
+}
+
+#CFG_WAT_ENABLE ON
+espy MBU.MBI.CFG_WAT_ENABLE [when=L && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+#turn on WAT0A clocks, leave other wat clocks off
+#MBI.MBI.WAT0A.WAT_ENABLE ON
+#espy MBU.MBI.MBI.WAT0A.WAT_ENABLE [when=L && (ec < 0x20)] {
+espy MBU.MBI.MBI.WAT0A.WAT_ENABLE [when=L ] {
+  spyv;
+  ON;
+}
+
+#turn on WAT0B clocks, leave other wat clocks off
+#MBI.MBI.WAT0B.WAT_ENABLE ON
+#espy MBU.MBI.MBI.WAT0B.WAT_ENABLE [when=L && (ec < 0x20)] {
+espy MBU.MBI.MBI.WAT0B.WAT_ENABLE [when=L ] {
+  spyv;
+  ON;
+}
+
+#USFF Upstream Data Bus Select
+#MBU.MBS.CH.DEBUG_SEL_MODE10
+#espy MBU.MBS.CH.DEBUG_SEL_MODE10  [when=L && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+#Set up the MBI debug bus to select ds commands
+#stick CFG_DBG_MUX(0:15)=0b1000000000000000
+#Set up the MBI upstream debug bus
+#stick CFG_DBG_MUX(0:15)=0b0010000000000000
+# MBU.MBI.CFG_DBG_MUX (0:15)
+#ispy  MBU.MBI.CFG_DBG_MUX  [when=L && (ec < 0x20)] {
+ispy  MBU.MBI.CFG_DBG_MUX  [when=L ] {
+  spyv   ;
+  0x2000 ;
+}
+
+
+# DD2 workaround for HW259743: The early inband done mode will not be supported in Centaur for DD2 and beyond.
+#                              Removing the DD2 restriction to always operate in late inband done mode.
+#
+# DD1 workaround for HW218228: 8B inband write is issued while occ update is in progress causing data miscompare
+# -----------------------------------------------------------------------------------------------------------------------
+#espy MBU.MBS.IBB.IBRD.CFG_LATE_OCC_UPDATE_DONE [when=L && (ec < 0x20)] {
+espy MBU.MBS.IBB.IBRD.CFG_LATE_OCC_UPDATE_DONE [when=L ] {
+  spyv;
+  ON;
+}
+
+# DD1 workaround for HW219317: Cleaner calculates wrong Page Mode harvest address during inband op
+# -----------------------------------------------------------------------------------------------------------------------
+# 1. ignore it - a few inband ops every 250 uS causing this problem will likely not cause enough cleaner performance degradation to notice
+# 2. use the alternate SCOM-able cleaner rank_type settings, which are not affected by this problem.
+
+
+# DD1 workaround for HW221654: L4 directory address parity generated incorrectly during array-init
+# -----------------------------------------------------------------------------------------------------------------------
+
+#Description: The RAS enhancement to protect a directory array error by initializing the array with proper parity is not
+#working.
+#Impact: this has no impact.
+#Workaround: The enhanced parity protection must be disabled on DD 1
+
+#DD1 : starting in cen1_mbu086, the dial CFG_DIR_ECC_USE_ADDPAR_DISABLE will default to ON. This fix is in cen1_mbu085_fixes as well. This will cause the array
+# to init to all zero.
+
+#DD2. We will plan fix the directory address parity bug and then change the scan flush value for CFG_DIR_ECC_USE_ADDPAR_DISABLE to be OFF. This will cause the
+#directory array-init to have the correct non-zero pattern when CFG_DIR_ABIST_INIT_ENABLE is o
+
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Set MBS Trace Arrays Compression Care Masks
+# -----------------------------------------------------------------------------------------------------------------------
+
+ispy  TCN.TRA.MBS1TRA.TR.DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L && (ec < 0x20)] {
+  spyv   ;
+  0x8000000800000000020000 ;
+}
+
+ispy  TCN.TRA.MBS2TRA.TR.DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L && (ec < 0x20)] {
+  spyv   ;
+  0xFFFFFFFFFFFE0000000000 ;
+}
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Config Hang Counter to Max Value - HW238807
+# -----------------------------------------------------------------------------------------------------------------------
+
+ispy  MBU.MBS.CFG_HANG_COUNT [when=L && (ec < 0x20)] {
+  spyv   ;
+  0b11111111111 ;
+}
+
+
+
+# -----------------------------------------------------------------------------------------------------------------------
+#DEFECT FW624740
+#
+#NEW SETTING (Tuleta):
+#Minimum Hang Time  = 1024 * 1464 * 2 * (1ns/cycle) = 2.998ms
+#Maximum Hang Time = 1024 * 1464 * 3 * (1ns/cycle) = 4.5ms
+#
+#
+#NEW SETTING (Brazos):
+#Minimum Hang Time  = 1024 * 1464 * 2 * (833ps/cycle) = 2.498ms
+#Maximum Hang Time = 1024 * 1464 * 3 * (833ps/cycle) = 3.748ms
+# -----------------------------------------------------------------------------------------------------------------------
+
+ispy  MBU.MBS.CFG_HANG_COUNT [when=L && (ec >= 0x20)] {
+  spyv   ;
+  0b10110111000 ;
+}
+
+
+
+
+
+# L4 CLEANER SETTINGS TO IMPROVE PERFORMANCE
+#---------------------------------------------------------------------------------
+
+#************** CLEAN REQUEST TRIGGER: DV MIN THRESHOLD 0x0000 (0)  ******************************************
+#putspy cen MBU.MBS.MBS_CLN_DV_CGC_CNT_LWMARK 00000000000000 -ib -all
+
+#ispy  MBU.MBS.MBS_CLN_DV_CGC_CNT_LWMARK [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1)] {
+ispy  MBU.MBS.MBS_CLN_DV_CGC_CNT_LWMARK [when=L ] {
+  spyv   ;
+  0b00000000000000 ;
+}
+
+
+
+#************** CLEAN REQUEST TRIGGER: WRQ LWMARK 0x18 (24)  ******************************************
+#putspy cen MBU.MBS.MBS_CLN_RNK_GRP_WRQ_CNT_LWMARK 011000 -ib -all
+#************** CLEAN REQUEST TRIGGER: WRQ LWMARK 0x0C (12)  ******************************************
+#putspy cen MBU.MBS.MBS_CLN_RNK_GRP_WRQ_CNT_LWMARK 001100 -ib -all
+#************** CLEAN REQUEST TRIGGER: WRQ LWMARK 0x06 (06)  ******************************************
+#putspy cen MBU.MBS.MBS_CLN_RNK_GRP_WRQ_CNT_LWMARK 000110 -ib -all
+
+
+#best value for all rank group, since scan initfile does not support attributes
+ispy MBU.MBS.MBS_CLN_RNK_GRP_WRQ_CNT_LWMARK  [when=L ] {
+  spyv   ;
+  0b001001 ;
+}
+
+
+
+#ispy MBU.MBS.MBS_CLN_RNK_GRP_WRQ_CNT_LWMARK  [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (def_num_mbs_ranks == 2) ] {
+#  spyv   ;
+#  0b011000 ;
+#}
+
+
+#ispy MBU.MBS.MBS_CLN_RNK_GRP_WRQ_CNT_LWMARK  [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (def_num_mbs_ranks == 4) ] {
+#  spyv   ;
+#  0b001100 ;
+#}
+
+
+#ispy MBU.MBS.MBS_CLN_RNK_GRP_WRQ_CNT_LWMARK  [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1) && (def_num_mbs_ranks == 8) ] {
+#  spyv   ;
+#  0b000110 ;
+#}
+
+#************** PAGE HARVESTING MODE: DISABLE HARVESTING  ******************************************
+#putspy cen MBU.MBS.MBS_CLN_PAGE_MODE_HARVEST_DIS OFF -all
+
+#espy MBU.MBS.MBS_CLN_PAGE_MODE_HARVEST_DIS [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1)] {
+espy MBU.MBS.MBS_CLN_PAGE_MODE_HARVEST_DIS [when=L ] {
+  spyv;
+  OFF;
+}
+
+
+
+
+#************** PAGE HARVESTING MODE: Page Mode Xfer Fails before abandoning 0x1 ******************************************
+#putspy cen MBU.MBS.MBS_CLN_PAGE_MODE_HARV_MAX_FAILS_CNT 001 -ib -all
+
+#ispy MBU.MBS.MBS_CLN_PAGE_MODE_HARV_MAX_FAILS_CNT [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1)] {
+ispy MBU.MBS.MBS_CLN_PAGE_MODE_HARV_MAX_FAILS_CNT [when=L ] {
+  spyv   ;
+  0b001 ;
+}
+
+
+
+
+#************** PAGE HARVESTING MODE: Page Conflict Wait Counter 0x00 ******************************************
+#putspy cen MBU.MBS.MBS_CLN_PG_HARV_CONFLICT_WAIT_CNT 000000 -ib -all
+
+#ispy MBU.MBS.MBS_CLN_PG_HARV_CONFLICT_WAIT_CNT [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1)] {
+ispy MBU.MBS.MBS_CLN_PG_HARV_CONFLICT_WAIT_CNT [when=L ] {
+  spyv   ;
+  0b000000 ;
+}
+
+
+
+
+
+#************** WHAP Algorithm Modes 0x04 ******************************************
+#putspy cen MBU.MBS.CFG_WHAP_CLEAN_THRESHOLD 00100 -ib -all
+
+#ispy MBU.MBS.CFG_WHAP_CLEAN_THRESHOLD [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1)] {
+ispy MBU.MBS.CFG_WHAP_CLEAN_THRESHOLD [when=L ] {
+  spyv   ;
+  0b00100 ;
+}
+
+
+
+
+
+##************** WHAP Mode Write Start Count 0x03 ****************************************
+#putspy cen MBU.MBS.CFG_WHAP_WR_START_RECNT 0 3 011 -ib -all
+
+#ispy MBU.MBS.CFG_WHAP_WR_START_RECNT [when=L && (SYS.ATTR_MSS_CLEANER_ENABLE == 1)] {
+ispy MBU.MBS.CFG_WHAP_WR_START_RECNT [when=L ] {
+  spyv   ;
+  0b011 ;
+}
+
+
+
+
+#*****************************************************************************************

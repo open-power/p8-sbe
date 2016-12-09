@@ -1,0 +1,64 @@
+<!-- $Id: proc_sbe_instruct_start_errors.xml,v 1.5 2014/07/23 19:51:49 jmcgill Exp $ -->
+<!-- Halt codes for proc_sbe_instruct_start -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_INSTR_START_SPWU_FAILED</rc>
+    <description>
+      Procedure: proc_sbe_instruct_start
+      Special wakeup before starting instructions failed.
+    </description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_INSTRUCT_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_INSTR_START_THREAD0_NOT_RUNNING</rc>
+    <description>
+      Procedure: proc_sbe_instruct_start
+      Thread 0 is still in nap/sleep/winkle after the instruct start
+    </description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_INSTRUCT_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_INSTR_START_MAINT_MODE</rc>
+    <description>
+      Procedure: proc_sbe_instruct_start
+      Can't start instructions because the core is still in maintenance mode.
+    </description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_INSTRUCT_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+</hwpErrors>

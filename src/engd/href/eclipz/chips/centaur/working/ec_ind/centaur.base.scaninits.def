@@ -1,0 +1,2 @@
+# set of initfiles to process
+CENTAUR_SCAN_INITS := centaur.thermal.initfile centaur.mbs.initfile centaur.mba.initfile centaur.dmi.initfile

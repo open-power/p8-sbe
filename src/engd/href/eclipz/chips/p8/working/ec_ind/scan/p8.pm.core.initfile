@@ -1,0 +1,486 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Required keywords/variables
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+SyntaxVersion = 1
+InstanceHierarchy = EM
+
+
+#--******************************************************************************
+#-- Add dials here
+#--******************************************************************************
+
+# SW237510
+# set DTS tune bits
+ispy dts_tunebits_core [when=L && ((PU_CHIP_TYPE == NAPLES) || ((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv ;
+  0b101010101010;
+}
+
+
+#--******************************************************************************
+# Setup For Activity Proxy Calculation
+#--******************************************************************************
+# Disabled until tested
+# ispy EXP.EC.PC.PC_NW.PFTH_OHA_INSTR_CNT_SEL [when=L] {
+#  spyv ;
+#  0b01 ;
+# }
+
+#--******************************************************************************
+# Weights for Activity Proxy Calculation
+#--******************************************************************************
+# Disabled until tested
+#ispy EXP.EC.PC.PC_NW.PFTH_IDISP_WEIGHT [when=L] {
+#        spyv ;
+#        0x7 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_ICOMP_WEIGHT [when=L] {
+#        spyv ;
+#        0xc ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_VS_RACC_READ_WEIGHT [when=L] {
+#        spyv ;
+#        0x0 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_VS_RACC_WRITE_WEIGHT [when=L] {
+#        spyv ;
+#        0xe ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_FX_RACC_READ_WEIGHT [when=L] {
+#        spyv ;
+#        0x4 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_FX_RACC_WRITE_WEIGHT [when=L] {
+#        spyv ;
+#        0x7 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_VS_ROUTE_DF_WEIGHT [when=L] {
+#        spyv ;
+#        0x6 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_VS_ROUTE_FP_WEIGHT [when=L] {
+#        spyv ;
+#        0xf ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_VS_ROUTE_PM_WEIGHT [when=L] {
+#        spyv ;
+#        0x0 ;
+#}
+#
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_VS_ROUTE_VX_WEIGHT [when=L] {
+#        spyv ;
+#        0x0 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_VS_ROUTE_XS_WEIGHT [when=L] {
+#        spyv ;
+#        0x0 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_SD_BR_WEIGHT [when=L] {
+#        spyv ;
+#        0x4 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_IFU_ACT_ICACRD_WEIGHT [when=L] {
+#        spyv ;
+#        0xf ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_IFU_ACT_ICACWR_WEIGHT [when=L] {
+#        spyv ;
+#        0xf ;
+#}
+#
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_LSU_CAC_STORE_WEIGHT [when=L] {
+#        spyv ;
+#        0x6 ;
+#}
+#
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_FX_ISSUE_SINGLE_WEIGHT [when=L] {
+#        spyv ;
+#        0x1 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_FX_ISSUE_MULTIPLY_WEIGHT [when=L] {
+#        spyv ;
+#        0x1 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_FX_ISSUE_DIV_WEIGHT [when=L] {
+#        spyv ;
+#        0x0 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_FX_ISSUE_MULTICYC_WEIGHT [when=L] {
+#        spyv ;
+#        0x0 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_FX2LS_ISSUE_WEIGHT [when=L] {
+#        spyv ;
+#        0x0 ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_EXEC_UTIL_SD_CR_WEIGHT [when=L] {
+#        spyv ;
+#        0xf ;
+#}
+
+
+
+
+
+#--******************************************************************************
+#-- TRACE
+#--******************************************************************************
+
+# Disabled until tested
+# Put in a default value just to get the PURR & SPURR reasonable in the exercisers
+# This is for Cronus only
+#ispy EXP.EC.PC.PC_NW.TFP.RWMR  [when=L] {
+#    spyv                     ,       err_mode        ;
+#    0x3A52B09065116727       ,           L           ;
+#}
+
+#--******************************************************************************
+#-- Memory Hierarchy Weights
+#--******************************************************************************
+# Disabled until tested
+# L2.0 latency =8.5 and L3.0 hit latency=23.5 pclocks
+# instead of 9 make that 10
+# 8.5 means 50% chance 8 or 9
+#ispy EXP.EC.PC.PC_NW.PFTH_WM_COMPARE_VAL  [when=L] {
+#        spyv ;
+#        0xA  ;
+#}
+#
+#espy EXP.EC.PC.PC_NW.EN_PERF_THROT  [when=L] {
+#        spyv ;
+#        ON  ;
+#}
+#
+#espy EXP.EC.PC.PC_NW.EN_PERF_CNTRS  [when=L] {
+#        spyv ;
+#        ON  ;
+#}
+#
+#espy EXP.EC.PC.PC_NW.RUN_LATCH_FILTER  [when=L] {
+#        spyv ;
+#        ON  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L2_PRIVATE_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x02  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L3_PRIVATE_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x09  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_RSV0_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x00  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_RSV1_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x00  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L21_HIT_SHARED_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x33  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L21_HIT_MOD_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x29  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L31_HIT_SHARED_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x25  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L31_HIT_MOD_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x30  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L25_L35_W4_HIT_SHARED_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x37  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L25_L35_W3_HIT_MOD_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x2A  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L27_L37_B4_HIT_SHARED_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x13  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L27_L37_B4_HIT_MOD_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x3C  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_ON_CHIP_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x1F  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_W4_CHIP_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x19  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_B4_CHIP_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x24  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_DBL_PUMP_WEIGHT_A  [when=L] {
+#        spyv ;
+#        0x00  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L2_PRIVATE_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x00  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L3_PRIVATE_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x00  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_RSV0_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x00  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_RSV1_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x00  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L21_HIT_SHARED_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x13  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L21_HIT_MOD_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x09  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L31_HIT_SHARED_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x52  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L31_HIT_MOD_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x09  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L25_L35_W4_HIT_SHARED_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x73  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L25_L35_W3_HIT_MOD_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x38  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L27_L37_B4_HIT_SHARED_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0xE5  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_L27_L37_B4_HIT_MOD_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x75  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_ON_CHIP_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x57  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_W4_CHIP_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x82  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_B4_CHIP_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0xFF  ;
+#}
+#
+#ispy EXP.EC.PC.PC_NW.PFTH_DBL_PUMP_WEIGHT_B  [when=L] {
+#        spyv ;
+#        0x01  ;
+#}
+
+
+#--******************************************************************************
+#-- THERM/CPM
+#--******************************************************************************
+
+# removed by TG
+# invert dts result
+# ispy EXP.EC.SD_LATCHES.SDCPM.SSS.INV_DTS_RESULT  [when=L]  {
+#        spyv;
+#        0b1;
+# }
+# ispy EXP.EC.IFU.I.IFFCPM.SSS.INV_DTS_RESULT  [when=L]  {
+#        spyv;
+#        0b1;
+# }
+# ispy EXP.EC.LS_LATCHES.LSCPMD.SSS.INV_DTS_RESULT  [when=L]  {
+#        spyv;
+#        0b1;
+# }
+# ispy EXP.EC.VS.CPM_DTS2_CTL.SSS.INV_DTS_RESULT  [when=L]  {
+#        spyv;
+#        0b1;
+# }
+
+#### Thermal Trips
+# setting 120C (115+5) = fatal, 112C (107 + 5) as critical, and 110C (105+5) as a warning
+# so we can make sure TPMD is not doing anything stupid
+# all but critical will be masked for manufacturing and field, but checktop in lab
+
+# EXP TRIP
+## Workaround for thermal throttling on critical trip HW072173
+
+# dts_power_up_cnt (value * 32 * by cycle = 8 * 32 * 1000 ps = 256 ns):
+
+# removed by TG
+#ispy EXP.EC.LS_LATCHES.LSCPMD.SSS.DTS_POWER_UP_CNT [when=L]  {
+#        spyv ;
+#        0b01000;
+#}
+#ispy EXP.EC.VS.CPM_DTS2_CTL.SSS.DTS_POWER_UP_CNT [when=L]  {
+#        spyv ;
+#        0b01000;
+#}
+#ispy EXP.EC.SD_LATCHES.SDCPM.SSS.DTS_POWER_UP_CNT [when=L]  {
+#        spyv ;
+#        0b01000;
+#}
+#ispy EXP.EC.IFU.I.IFFCPM.SSS.DTS_POWER_UP_CNT [when=L]  {
+#        spyv ;
+#        0b01000;
+#}
+
+# sweep_length_cnt (value * 32 * by cycle = 8 * 32 * 1000 ps = 256 ns):
+
+# removed by TG
+#ispy EXP.EC.LS_LATCHES.LSCPMD.SSS.SWEEP_LENGTH_CNT [when=L]  {
+#        spyv ;
+#        0b01000;
+#}
+#ispy EXP.EC.VS.CPM_DTS2_CTL.SSS.SWEEP_LENGTH_CNT [when=L]  {
+#        spyv ;
+#        0b01000;
+#}
+#ispy EXP.EC.SD_LATCHES.SDCPM.SSS.SWEEP_LENGTH_CNT [when=L]  {
+#        spyv ;
+#        0b01000;
+#}
+#ispy EXP.EC.IFU.I.IFFCPM.SSS.SWEEP_LENGTH_CNT [when=L]  {
+#        spyv ;
+#        0b01000;
+#}
+
+## 02/04/2011 - Additional CPM inits for P7+
+## Required for CPMs to work properly but never made it into inits before now
+# Disabled until reviewed/ tested on P8 (GSS)
+#espy EXP.EC.LS.LSSSENS.CPM_GENERATE.CPM.RESET_ON_READ_ENABLE [when=L] {
+#      spyv;
+#      ON;
+#}
+#espy EXP.L3.L3SENSE.CPM_GENERATE.CPM.RESET_ON_READ_ENABLE [when=L] {
+#      spyv;
+#      ON;
+#}
+#espy EXP.EC.SD.SDSS.CPM_GENERATE.CPM.RESET_ON_READ_ENABLE [when=L] {
+#      spyv;
+#      ON;
+#}
+#espy EXP.EC.FX_LATCHES.THERMALSENSOR.CPM_GENERATE.CPM.RESET_ON_READ_ENABLE [when=L] {
+#      spyv;
+#      ON;
+#}
+#
+#espy EXP.EC.LS.LSSSENS.CPM_GENERATE.CPM.STATIC_PATH_DELAY_CTRL [when=L] {
+#      spyv;
+#      DELAY11;
+#}
+#espy EXP.L3.L3SENSE.CPM_GENERATE.CPM.STATIC_PATH_DELAY_CTRL [when=L] {
+#      spyv;
+#      DELAY11;
+#}
+#espy EXP.EC.SD.SDSS.CPM_GENERATE.CPM.STATIC_PATH_DELAY_CTRL [when=L] {
+#      spyv;
+#      DELAY11;
+#}
+#espy EXP.EC.FX_LATCHES.THERMALSENSOR.CPM_GENERATE.CPM.STATIC_PATH_DELAY_CTRL [when=L] {
+#      spyv;
+#      DELAY11;
+#}
+#

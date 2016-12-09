@@ -1,0 +1,38 @@
+<!-- $Id: proc_sbe_check_master_errors.xml,v 1.3 2014/07/23 19:51:49 jmcgill Exp $ -->
+<!-- Halt codes for proc_sbe_check_master -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_CHECK_MASTER_NO_VALID_MCS</rc>
+    <description>
+      Procedure: proc_sbe_check_master
+      Both MCL/MCR fences asserted, no functional MCS units are available for use on master chip.
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_CHECK_MASTER</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_SBE_CHECK_MASTER</id>
+    <scomRegister>NEST_GP0_0x02000000</scomRegister>
+    <scomRegister>DEVICE_ID_REG_0x000F000F</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+</hwpErrors>

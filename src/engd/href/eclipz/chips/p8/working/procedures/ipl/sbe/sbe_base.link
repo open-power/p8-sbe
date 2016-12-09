@@ -1,0 +1,73 @@
+// $Id: sbe_base.link,v 1.3 2012/06/12 13:30:28 bcbrock Exp $
+
+// This linker script creates a binary base image. This script is processed
+// by cpp.
+
+#include "sbe_link.H"
+
+// Need to undefine these so that output formats are not modified!
+#undef powerpc
+#undef pore
+
+#ifdef PGAS_PPC
+OUTPUT_FORMAT(elf32-powerpc);
+#else
+OUTPUT_FORMAT(elf64-pore);
+#endif
+
+
+// Sections are aligned to minimum requirements.  The linker will pad short
+// sections with.  The linker script syntax is unusual in that the output
+// section description _must not_ end in a semicolon.
+
+#define ALIGN_SECTION(n) . = ALIGN(n);
+
+#define DEFSECTION(section, align)                      \
+    ALIGN_SECTION(align)                                \
+         _##section##_origin = .;                       \
+         _##section##_offset = . - _sbe_base_origin;    \
+         .section . : { *(.section) }                   \
+         _##section##_size = . - _##section##_origin;
+
+
+SECTIONS
+{
+    . = SBE_BASE_ORIGIN;
+    _sbe_base_origin = .;
+
+    // The .header is always linked first, followed by .fixed and
+    // .fixed_toc. These sections are fixed.  Some buffer space is inserted
+    // between .header and .fixed so that .fixed can remain "fixed" even if
+    // the header has to grow a little. 
+
+    DEFSECTION(header, 1)
+    DEFSECTION(fixed, 512)
+    ASSERT(_fixed_offset == SBE_XIP_FIXED_OFFSET, "The .fixed section moved!")
+    DEFSECTION(fixed_toc, 8)
+
+    // IPL data and text.  These sections are fixed.
+
+    DEFSECTION(ipl_text, 4)
+    DEFSECTION(ipl_data, 8)
+
+    // Runtime data and text.  These sections are fixed.
+
+    DEFSECTION(text, 4)
+    DEFSECTION(data, 8)
+
+    // The TOC and strings.  These sections are position independent.
+
+    DEFSECTION(toc, 4)
+    DEFSECTION(strings, 1)
+
+    // We require the size of the image to be a multiple of 8 bytes to
+    // guarantee that a fetch of the last address (in the PoreVe) will always
+    // be able to return 8 bytes.  When the binary is created by objcopy we
+    // specify to pad to the end symbol to ensure that the final
+    // padding bytes appear in the binary.
+
+    . = ALIGN(8);
+
+    _sbe_base_size = . - _sbe_base_origin;
+    _sbe_base_end = .;
+}

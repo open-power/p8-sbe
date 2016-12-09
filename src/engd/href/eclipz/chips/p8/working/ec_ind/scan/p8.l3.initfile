@@ -1,0 +1,254 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 1
+
+
+#--******************************************************************************
+#-- Murano DD1 workarounds
+#--******************************************************************************
+
+# Murano DD1 workaround for HW218887: use lfsr for L2 vs internal L3 CI request enquing.
+# pgw 08/17/2012               these should be set for both host based init and runtime.
+espy EXP.L3.L3_CI.L3CICTL0.L3_FIXED_L2_ORDER_DIS [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+espy EXP.L3.L3_CI.L3CICTL1.L3_FIXED_L2_ORDER_DIS [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+# alter to Refresh period.
+# pgw 08/30/2012      this should be done before refresh functional clock start and remain at this value
+espy EXP.L3.L3_ARB.L3CACTL.L3_REF_TIMER_DIVIDE [when=L && (avpTestCase != AVP_L2)] {
+  spyv;
+  DIV_BY_5;
+}
+
+# HW234590: disable concurrent refresh (current solution for UE issues)
+# jjm 01/13/2013
+espy EXP.L3.L3_ARB.L3CACTL.L3_CCR_DIS_CFG [when=L && (ec < 0x20) && (avpTestCase != AVP_L2)] {
+  spyv;
+  ON;
+}
+
+# Murano DD1 workaround for HW225025: will be fix in Ven DD1
+ispy EXP.L3.L3_RD.L3LFSRS.L3_MCFP_SNPFILT_ON_THRESHOLD [when=L && (IPLMODE == RUNTIME) && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  0x1;
+}
+
+ispy EXP.L3.L3_RD.L3LFSRS.L3_MCFP_SNPFILT_OFF_THRESHOLD [when=L && (IPLMODE == RUNTIME) && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  0x0;
+}
+
+# Murano DD1 workaround for HW239545: Grub Memory Miscompare
+espy EXP.L3.L3_RD.L3RDDSP.L3_CREDIT_PF_ENQ_DIS [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x13) && (avpTestCase != AVP_L2)] {
+  spyv;
+  ON;
+}
+
+# Murano DD1 workaround for HW243176: L3 data bypass does not represent Ig
+# Also required for Venice DD1 (HW252130)
+espy EXP.L3.L3_RD_EARLY_PF_DONE_DIS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+
+# HW246506
+# target functions which could cause rejection of LCOs
+# adjust flush state, should be off for all modes (HBI/RUNTIME)
+espy EXP.L3.L3_MISC.L3CERRS.L3CERRS_LCO_RETRY_THROTL_DIS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  OFF;
+}
+
+# HW246506
+# conversion to CO if too many retries on LCO
+# adjust flush state, should be off for all modes (HBI/RUNTIME)
+espy EXP.L3.L3_MISC.L3CERRS.L3_LCO_RTY_LIMIT_DISABLE [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  OFF;
+}
+
+# HW249798
+# P8 LAB Tuleta:  L3 arbitration fairness bug causes nest hang
+# enable this mode to make the arbitration more fair
+espy EXP.L3.L3_PBARB.L3PBACTL.PBA_CFG_LFSR_FOR_COSNPF_ARB_EN [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+
+# HW269131
+# flush state will be fixed in Venice DD2.0
+espy EXP.L3.L3_PF.L3PFCTL.L3PFCTL_PF_CFG_APM_CHARGE_L4_ACC_EN [when=L && (IPLMODE == RUNTIME) && (((PU_CHIP_TYPE == MURANO) && (ec <= 0x21)) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20)))] {
+  spyv;
+  ON;
+}
+
+#HW269669
+#will be fixed in Vendd20
+espy EXP.L3.L3_CI.L3CICTL0.L3_MPLW_LMT_CFG [when=L &&  (((PU_CHIP_TYPE == MURANO) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20))))] {
+  spyv;
+  LMT_MPLW_5;
+}
+
+espy EXP.L3.L3_CI.L3CICTL1.L3_MPLW_LMT_CFG  [when=L &&  (((PU_CHIP_TYPE == MURANO) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20))))] {
+  spyv;
+  LMT_MPLW_5;
+}
+
+espy EXP.L3.L3_CI.L3CICTL0.L3_CI_MN_CI_LMT_CFG  [when=L &&  (((PU_CHIP_TYPE == MURANO) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20))))] {
+  spyv;
+  LMT_MN_CI_4;
+} 
+
+espy  EXP.L3.L3_CI.L3CICTL1.L3_CI_MN_CI_LMT_CFG [when=L &&  (((PU_CHIP_TYPE == MURANO) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20))))] {
+  spyv;
+  LMT_MN_CI_4;
+}
+
+# HW276709 (P8 Lab: Interrupted Power Management L3 purge can cause cache error)
+# set for all ECs
+espy EXP.L3.L3_ARB.L3CACTL.L3_OHA_REFR_QUISCE_DIS [when=L && (avpTestCase != AVP_L2)] {
+  spyv;
+  ON;
+}
+
+#HW246664 HA/MP vs L2 CO vs L3 CI Deadlock Workaround: Limit L3 CI machines
+espy EXP.L3.L3_CI.L3CICTL0.L3_CI_PF_CI_LMT_CFG [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  LMT_PF_CI_1;
+}
+
+espy EXP.L3.L3_CI.L3CICTL0.L3_CI_WI_CI_LMT_CFG [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  LMT_WI_CI_1;
+}
+#HW288205 : L3 PF Hang fix. Change behavior of L3 Prefetch Back-off mechanism
+ispy  EXP.L3.L3_PBARB.L3PBACTl.PBA_CFG_OFF_CHIP_MC_CLE_LMT_MIN [ when=L && (((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)) || ((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || (PU_CHIP_TYPE == NAPLES)) ] {
+  spyv;
+  0x4;
+
+
+}
+
+#Enable L3 addr HASH
+espy  EXP.L3.L3_MISC.L3CERRS.L3_ADDR_HASH_EN_CFG [ when=L && (IPLMODE == RUNTIME) && (avpTestCase != AVP_L2) ] {
+    spyv;
+    ON;
+}
+
+# disable pfA for sys/grp pump (SW271183)
+espy EXP.L3.L3_PF.L3PFCTL.L3PFCTL_PF_CFG_GRP_PMP_PFA_DIS [ when=L && (PU_CHIP_TYPE == VENICE) && (IPLMODE == RUNTIME) && (avpTestCase != AVP_L2) ] {
+    spyv;
+    ON;
+}
+espy EXP.L3.L3_PF.L3PFCTL.L3PFCTL_PF_CFG_SYS_PMP_PFA_DIS [ when=L && (PU_CHIP_TYPE == VENICE) && (IPLMODE == RUNTIME) && (avpTestCase != AVP_L2) ] {
+    spyv;
+    ON;
+}
+
+
+
+#--******************************************************************************
+#-- Runtime customization
+#--******************************************************************************
+
+# Alter the following after host based init
+
+# Purge and ===Delete L3 UEs all the time (for both HBI and Run time phase.)
+# Need to b===e off during IPL for avoid losing member and force co for l3 contain
+
+# Purge and Delete L3 UEs
+espy EXP.L3.L3_MISC.L3CERRS.L3_RDSN_LINEDEL_UE_EN [when=L] {
+  spyv,     expr;
+  ON,       (IPLMODE == RUNTIME) && (avpTestCase == NONE);
+}
+
+# No allocate on UE
+espy EXP.L3.L3_MISC.L3CERRS.L3_NO_ALLOCATE_MODE_EN [when=L] {
+  spyv,     expr;
+  ON,       (IPLMODE == RUNTIME) && (avpTestCase == NONE);
+}
+
+# direct mapped mode
+# Turn off dmap mode during runtime, which was set to default (scan flushed to ON) for host based inits
+espy EXP.L3.L3_MISC.L3CERRS.L3_DMAP_CI_EN_CFG [when=L] {
+  spyv,     expr;
+  OFF,      (IPLMODE == RUNTIME) && (avpTestCase == NONE);
+}
+
+
+#--******************************************************************************
+#-- Static customization
+#--******************************************************************************
+
+# hang pulse setup
+# early
+ispy EXP.L3.L3_MISC.L3CERRS.L3_HANG_POLL_PULSE_DIV [when=L] {
+    spyv;
+    0b0001; # 1
+}
+
+# late
+ispy EXP.L3.L3_MISC.L3CERRS.L3_DATA_POLL_PULSE_DIV [when=L] {
+    spyv;
+    0b0100; # 4
+}
+
+# L3 FIR Action Register Decodes:
+# (Action0, Action1, Mask)
+# ------------------------
+# (0,0,0) = Checkstop
+# (0,1,0) = Recoverable
+# (1,0,0) = Reserved
+# (1,1,0) = Local (Core) Checkstop / freeze
+# (x,x,1) = MASKED
+
+ispy EXP.L3.L3_MISC.L3CERRS.FIR_ACTION0_REG [when=L] {
+  spyv,               expr;
+  0x0000000000000000, (avpTestCase == AVP_L2);
+  0x0000000000000000, any;
+}
+
+ispy EXP.L3.L3_MISC.L3CERRS.FIR_ACTION1_REG [when=L] {
+  spyv,               expr;
+  0x0000000000000000, (avpTestCase == AVP_L2);
+  0x0DB4410E00000000, any;
+}
+
+ispy EXP.L3.L3_MISC.L3CERRS.FIR_MASK_REG [when=L] {
+  spyv,               expr;
+  0x0000000000000000, (avpTestCase == AVP_L2);
+  0x32493E21FC000000, any;
+}

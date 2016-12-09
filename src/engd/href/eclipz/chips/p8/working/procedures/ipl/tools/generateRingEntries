@@ -1,0 +1,99 @@
+#!/usr/bin/ksh
+
+# IBM_PROLOG_BEGIN_TAG                                                   
+# This is an automatically generated prolog.                             
+#                                                                        
+# OpenPOWER Project                                             
+#                                                                        
+# Contributors Listed Below - COPYRIGHT 2012,2016                        
+# [+] International Business Machines Corp.                              
+#                                                                        
+#                                                                        
+# Licensed under the Apache License, Version 2.0 (the "License");        
+# you may not use this file except in compliance with the License.       
+# You may obtain a copy of the License at                                
+#                                                                        
+#     http://www.apache.org/licenses/LICENSE-2.0                         
+#                                                                        
+# Unless required by applicable law or agreed to in writing, software    
+# distributed under the License is distributed on an "AS IS" BASIS,      
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        
+# implied. See the License for the specific language governing           
+# permissions and limitations under the License.                         
+#                                                                        
+# IBM_PROLOG_END_TAG                                                     
+
+
+
+
+rm proc_sbe_dd10_ring_table.S
+rm s1.ring_info
+
+#
+# List of rings to be put into the image
+#
+RINGS="
+pb_func_pb
+ex_func_core
+ex_func_l3
+ex_fary_l2
+perv_bndy_pll
+ex_func_l3refr
+ex_func_dpll
+"
+
+#
+# HEADER INFO to be put into the s1.ring_info file
+#
+echo \
+"# This list is default used by apply_eprom_ring_overrides when processing s1 chip type
+
+# ct=<p8|s1|cen>,ring=<ex_func|exgptr|...>
+" > s1.ring_info
+
+#
+# HEADER INFO to be put into the proc_sbe_dd10_ring_table.S file
+#
+echo \
+"
+
+
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+        .nolist
+#include \"p8_sbe.H\"
+        .list
+
+//------------------------------------------------------------------------------
+// Directives
+//------------------------------------------------------------------------------
+	.seeprom
+//------------------------------------------------------------------------------
+// Global Data
+//------------------------------------------------------------------------------
+
+	.ipl_data
+
+" >> proc_sbe_dd10_ring_table.S
+
+
+##
+## LOOP THRU ALL RINGS AND GENERATE ENTRIES
+##
+
+for i in $RINGS; do
+	echo "// ${i} --------------------------------------------------------------------
+	.global dd10_${i}_ring
+dd10_${i}_ring:
+	.quad 0x20
+	POREVE_DBG(\"Loading dd10_${i}_ring\\n\");
+	nop
+	
+	ret
+
+" >> proc_sbe_dd10_ring_table.S
+
+echo "ct=s1, ring=${i}" >> s1.ring_info
+
+done

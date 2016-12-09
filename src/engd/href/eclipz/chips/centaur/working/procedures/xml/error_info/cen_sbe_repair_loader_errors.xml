@@ -1,0 +1,117 @@
+<!-- Error codes for cen_sbe_repair_loader -->
+  <!-- $Id: cen_sbe_repair_loader_errors.xml,v 1.5 2014/07/23 20:16:05 jmcgill Exp $ -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CEN_SBE_REPAIR_LOADER_BUSY_ERR</rc>
+    <description>Repair loader reported busy when expected to be idle.</description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_SBE_REPAIR_LOADER</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CEN_SBE_REPAIR_LOADER_NOT_DONE_ERR</rc>
+    <description>Timed out waiting for repair loader operation to finish.</description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_SBE_REPAIR_LOADER</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CEN_SBE_REPAIR_LOADER_STATUS_ERR</rc>
+    <description>Mismatch in expected repair loader status.</description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_SBE_REPAIR_LOADER</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CEN_SBE_REPAIR_LOADER_ECC_TRAP_ERR</rc>
+    <description>ECC trap register reported error after repair loader operation.</description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_SBE_REPAIR_LOADER</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CEN_SBE_TCN_REFR_TIME_HEADER_MISMATCH_ERR</rc>
+    <description>Incorrect scan header detected for tcn_refr_time ring.</description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_NEST_CHIPLET</collectFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_CEN_SBE_REPAIR_LOADER</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+  <id>REG_FFDC_CEN_SBE_REPAIR_LOADER</id>
+    <scomRegister>ECID_PART_1_0x00010001</scomRegister>
+    <scomRegister>CEN_WRITE_ARRAY_REPAIR_REG_0x00050000</scomRegister>
+    <scomRegister>CEN_REPAIR_FRONTEND_REG_0x00050001</scomRegister>
+    <scomRegister>CEN_WRITE_ARRAY_REPAIR_CMD_0x00050002</scomRegister>
+    <scomRegister>CEN_READ_ARRAY_REPAIR_STATUS_0x00050003</scomRegister>
+    <scomRegister>CEN_READ_ECC_TRAP_REGISTER_0x00050004</scomRegister>
+    <scomRegister>CEN_REPAIR_CONFIG_REG_0x00050005</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+</hwpErrors>

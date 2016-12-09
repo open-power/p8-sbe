@@ -1,0 +1,258 @@
+#!/usr/bin/tclsh
+
+# IBM_PROLOG_BEGIN_TAG                                                   
+# This is an automatically generated prolog.                             
+#                                                                        
+# OpenPOWER Project                                             
+#                                                                        
+# Contributors Listed Below - COPYRIGHT 2012,2016                        
+# [+] International Business Machines Corp.                              
+#                                                                        
+#                                                                        
+# Licensed under the Apache License, Version 2.0 (the "License");        
+# you may not use this file except in compliance with the License.       
+# You may obtain a copy of the License at                                
+#                                                                        
+#     http://www.apache.org/licenses/LICENSE-2.0                         
+#                                                                        
+# Unless required by applicable law or agreed to in writing, software    
+# distributed under the License is distributed on an "AS IS" BASIS,      
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        
+# implied. See the License for the specific language governing           
+# permissions and limitations under the License.                         
+#                                                                        
+# IBM_PROLOG_END_TAG                                                     
+
+
+
+
+set usage "
+
+ Usage: sbe_xip_validate_object object-file \[type\]
+
+ Validate that the object-file only contains the ELF sections expected by the
+ SBE-XIP binary format.  If any unexpected sections appear in the object file
+ it will render the final SBE-XIP image inconsistent and unusable.  The
+ optional type specification further restricts the allowable section types.
+ The currently supported SBE-XIP types are 'otprom', 'ipl', 'centaur',
+ 'pibmem', 'ipl_test' and 'rt_test'. This checker operates on individual
+ binary files or the final link image. 
+"
+
+#  This script uses 'readelf -S -W' to generate a digest of section headers.
+# The digest is then parsed to find all non-empty sections that are
+# "allocated", i.e., marked to be placed into the final binary.  The list of
+# allocated sections is then checked for legality in general and with respect
+# to the optional object file type.  Finally a check is made that all sections
+# that appear in the object file are at least expected to be there.
+
+#  This is an example of the output that's being parsed. This one is actually
+# erroneous as the .illegal section is not empty.
+
+# There are 18 section headers, starting at offset 0x10c:
+# 
+# Section Headers:
+#   [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+#   [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+#   [ 1] .text             PROGBITS        00000000 000034 000000 00  AX  0   0  1
+#   [ 2] .data             PROGBITS        00000000 000034 000000 00  WA  0   0  1
+#   [ 3] .bss              NOBITS          00000000 000034 000000 00  WA  0   0  1
+#   [ 4] .toc_data         PROGBITS        00000000 000034 000000 00   A  0   0  1
+#   [ 5] .toc_strings      PROGBITS        00000000 000034 000000 00  AS  0   0  1
+#   [ 6] .strings          PROGBITS        00000000 000034 000000 00  AS  0   0  1
+#   [ 7] .pore_data        PROGBITS        00000000 000034 000000 00   A  0   0  1
+#   [ 8] .otprom_text      PROGBITS        00000000 000034 000000 00  AX  0   0  1
+#   [ 9] .ipl_text         PROGBITS        00000000 000034 000000 00  AX  0   0  1
+#   [10] .slw_text         PROGBITS        00000000 000034 000000 00  AX  0   0  1
+#   [11] .cen_text         PROGBITS        00000000 000034 000000 00  AX  0   0  1
+#   [12] .initf            PROGBITS        00000000 000034 000000 00  AX  0   0  1
+#   [13] .rt_text          PROGBITS        00000000 000034 000000 00  AX  0   0  1
+#   [14] .illegal          PROGBITS        00000000 000034 00003c 00  AX  0   0  1
+#   [15] .shstrtab         STRTAB          00000000 000070 00009b 00      0   0  1
+#   [16] .symtab           SYMTAB          00000000 0003dc 003140 10     17 788  4
+#   [17] .strtab           STRTAB          00000000 00351c 004c12 00      0   0  1
+# Key to Flags:
+#   W (write), A (alloc), X (execute), M (merge), S (strings)
+#   I (info), L (link order), G (group), x (unknown)
+#   O (extra OS processing required) o (OS specific), p (processor specific)
+
+#  These are the allowed section names and the object types they may appear
+# in.  Several sections defined by the SBE-XIP format are always required to
+# be empty in object files.
+
+set types {base centaur otprom pibmem ipl_test rt_test}
+
+set allowed(.header)      {base centaur               ipl_test rt_test}
+set allowed(.fixed)       {base centaur               ipl_test rt_test}
+set allowed(.fixed_toc)   {base centaur               ipl_test rt_test}
+set allowed(.ipl_text)    {base centaur otprom pibmem ipl_test}
+set allowed(.ipl_data)    {base centaur otprom pibmem ipl_test}
+set allowed(.text)        {base                                rt_test}
+set allowed(.data)        {base                                rt_test}
+set allowed(.toc)         {base centaur               ipl_test rt_test}
+set allowed(.strings)     {base centaur               ipl_test rt_test} 
+
+#  Only these sections are ever expected to appear in any ELF.  The .illegal
+# section is expected but always required to be empty.
+
+set expected [concat [array names allowed] \
+                  {.illegal .halt .fixed .bss .debug_line .debug_info
+                      .debug_abbrev .debug_aranges .shstrtab .symtab .strtab
+                      .rela.header .rela.ipl_data .rela.ipl_text 
+                      .rela.data .rela.text
+                      .rela.toc .rela.strings .rela.halt .rela.fixed
+                      .rela.debug_line .rela.debug_info .rela.debug_arang
+                      .rela.debug_aranges}]
+
+
+############################################################################
+# The script
+############################################################################
+
+# Note sure why this is needed, it keeps the output from including ^M when run
+# inside of a Makefile
+
+fconfigure stdout -translation lf
+
+set nargs [llength $argv]
+set file [lindex $argv 0]
+set type [lindex $argv 1]
+
+#  Allow either 1 or 2 args, and if we see things that look like [-]-help give
+# some help.  Also check for a legal type.
+
+if {($nargs == 0) || ($nargs > 2)} {
+    puts "Wrong number of arguments; See usage below"
+    puts $usage
+    exit 1
+}
+
+if {[regexp {^-?-h} $file] || [regexp {^-?-h} $type]} {
+    puts $usage
+    exit 0
+}
+
+if {($type ne {}) && ([lsearch -exact $types $type] < 0)} {
+    puts "Unrecognized object file type '$type'; See usage below"
+    puts $usage
+    exit 1
+}
+
+#  Get the raw data
+
+if {[catch {set data [exec readelf -S -W $file]}]} {
+    puts stderr "Either the file $file does not exist or is not an ELF"
+    puts stderr "object file."
+    exit 1
+}
+
+#  Create a list of non-empty, allocated sections. The lines we care about
+# match against '[nn]', but are easier to parse if we eliminate the initial
+# '[nn]'.  We further only care about lines with 10 fields - the others either
+# have no flags or no name (see the example above).
+
+set allocated {}
+set lines [split $data \n]
+
+foreach line $lines {
+    if {[regexp {^\s*\[\s*\d+\](.*)$} $line match rest] && \
+            ([llength $rest] == 10)} {
+        set size 0x[lindex $rest 4]
+        if {[string match *A* [lindex $rest 6]] && ($size != 0)} {
+            lappend allocated [lindex $rest 0]
+        }
+    }
+}
+
+#  Create the initial list of illegal sections.  These are allocted sections
+#  that are not allowed.
+
+set illegal {}
+
+foreach section $allocated {
+    if {[info exists allowed($section)]} {
+        if {($type ne {}) && ([lsearch $allowed($section) $type] < 0)} {
+            lappend illegal $section
+        }
+    } else {
+        lappend illegal $section
+    }
+}
+
+
+#  Add to the list of illegal sections any sections we are not expecting to
+#  see at all.  Some programming errors can cause unexpected and unallocated
+#  sections to appear.
+
+foreach line $lines {
+    if {[regexp {^\s*\[\s*\d+\](.*)$} $line match rest]} {
+        set section [lindex $rest 0]
+        if {$section ne "NULL"} {
+            if {[lsearch $expected $section] < 0} {
+                lappend illegal $section
+            }
+        }
+    }
+}
+    
+
+# Report and bomb if any illegal sections are present.  The '.illegal' section
+# has a special meaning (see p8_sbe.H).
+
+if {$illegal eq {}} {
+    exit 0
+}
+
+foreach line $lines {
+    puts $line
+}
+
+puts stderr ""
+puts stderr "*** SBE ELF Section Error ***"
+puts stderr ""
+puts stderr "The object file $file contains the following illegal ELF sections:"
+puts stderr ""
+puts stderr "    $illegal"
+puts stderr ""
+puts stderr "The presence of these ELF sections may render an SBE image"
+puts stderr "inconsistent and unusable. Please modify the source code or data"
+puts stderr "that creates these sections.  If this message is being generated" 
+puts stderr "from the validation of a .out file, look at the associated" 
+puts stderr ".map file to determine which source files are generating"
+puts stderr "the illegal sections."
+puts stderr ""
+puts stderr "If you believe that the offending section(s) is(are) benign,"
+puts stderr "e.g., unallocated sections generated by the assembler, you can"
+puts stderr "edit the script 'sbe_xip_validate_object' and add the"
+puts stderr "section name to the list of 'expected' sections."
+
+if {[lsearch $illegal .illegal] < 0} {
+    exit 1
+}
+
+puts stderr ""
+puts stderr "The presence of the .illegal section indicates that there exists"
+puts stderr "source code or data that has not been implicitly of explicitly"
+puts stderr "assigned to one of the legal ELF sections."
+puts stderr ""
+
+exit 1
+
+
+
+
+
+
+
+
+
+
+
+
+            
+        
+    
+
+
+
+

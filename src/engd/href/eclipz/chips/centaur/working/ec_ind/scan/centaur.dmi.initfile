@@ -1,0 +1,341 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--**************************************************************************************
+#-- Required keywords/variables
+#--**************************************************************************************
+
+SyntaxVersion = 1
+
+# Define env types:
+#define def_IS_VBU = (U);    # Simulation only
+#define def_IS_HW  = (W);    # Hardware
+
+
+#--**************************************************************************************
+#----------------------------------------------------------------------------------------
+#     ____                ________
+#    / __ )__  _______   /  _/ __ \
+#   / __  / / / / ___/   / // / / /
+#  / /_/ / /_/ (__  )  _/ // /_/ /
+# /_____/\__,_/____/  /___/_____/
+#
+#----------------------------------------------------------------------------------------
+#--**************************************************************************************
+
+#espy DMI.BUS_ID [when=L] {
+#    spyv;
+#    DMI_BUS;
+#}
+
+
+#--**************************************************************************************
+#----------------------------------------------------------------------------------------
+#    ______                          ________
+#   / ____/________  __  ______     /  _/ __ \
+#  / / __/ ___/ __ \/ / / / __ \    / // / / /
+# / /_/ / /  / /_/ / /_/ / /_/ /  _/ // /_/ /
+# \____/_/   \____/\__,_/ .___/  /___/_____/
+#                      /_/
+#----------------------------------------------------------------------------------------
+#--**************************************************************************************
+
+#espy DMI.GROUP_ID [when=L] {
+#    spyv;
+#    DMI_BUS;
+#}
+
+
+#--**************************************************************************************
+#----------------------------------------------------------------------------------------
+#     ____                         __                         ______      __
+#    /  _/___ ___  ____  ___  ____/ /___ _____  ________     / ____/___ _/ /
+#    / // __ `__ \/ __ \/ _ \/ __  / __ `/ __ \/ ___/ _ \   / /   / __ `/ /
+#  _/ // / / / / / /_/ /  __/ /_/ / /_/ / / / / /__/  __/  / /___/ /_/ / /
+# /___/_/ /_/ /_/ .___/\___/\__,_/\__,_/_/ /_/\___/\___/   \____/\__,_/_/
+#             /_/
+#
+#----------------------------------------------------------------------------------------
+#--**************************************************************************************
+
+#ispy DMI.BUSCTL.BUS_CTL_REGS.TX_ZCAL_P_4X [when=L] {
+#    spyv;
+#    0b00100;
+#}
+
+#ispy DMI.BUSCTL.BUS_CTL_REGS.TX_ZCAL_SM_MIN_VAL [when=L] {
+#    spyv,      expr;
+#    0b0010101, def_IS_HW;
+#    0b0010110, def_IS_VBU;
+#}
+
+#ispy DMI.BUSCTL.BUS_CTL_REGS.TX_ZCAL_SM_MAX_VAL [when=L] {
+#    spyv;
+#    0b1000110;
+#}
+
+
+#--**************************************************************************************
+#----------------------------------------------------------------------------------------
+#     __                        ____                             ____
+#    / /   ____ _____  ___     / __ \____ _      _____  _____   / __ \____ _      ______
+#   / /   / __ `/ __ \/ _ \   / /_/ / __ \ | /| / / _ \/ ___/  / / / / __ \ | /| / / __ \
+#  / /___/ /_/ / / / /  __/  / ____/ /_/ / |/ |/ /  __/ /     / /_/ / /_/ / |/ |/ / / / /
+# /_____/\__,_/_/ /_/\___/  /_/    \____/|__/|__/\___/_/     /_____/\____/|__/|__/_/ /_/
+#
+#----------------------------------------------------------------------------------------
+#--**************************************************************************************
+
+
+### # per-lane (RX)
+### espy DMI.RX.RXPACKS#0.RXPACK_DEFAULT.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+###
+### espy DMI.RX.RXPACKS#0.RXPACK_DEFAULT.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+###
+### espy DMI.RX.RXPACKS#0.RXPACK_DEFAULT.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+###
+### espy DMI.RX.RXPACKS#0.RXPACK_DEFAULT.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+   
+### espy DMI.RX.RXPACKS#1.RXPACK_DEFAULT.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#1.RXPACK_DEFAULT.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#1.RXPACK_DEFAULT.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#1.RXPACK_DEFAULT.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+
+### espy DMI.RX.RXPACKS#2.RXPACK_DEFAULT.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#2.RXPACK_DEFAULT.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#2.RXPACK_DEFAULT.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#2.RXPACK_DEFAULT.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+
+### espy DMI.RX.RXPACKS#3.RXPACK_DEFAULT.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#3.RXPACK_DEFAULT.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#3.RXPACK_DEFAULT.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#3.RXPACK_DEFAULT.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+
+### espy DMI.RX.RXPACKS#4.RXPACK_DEFAULT.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.RX.RXPACKS#4.RXPACK_DEFAULT.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+   
+### -------------------   
+### # per-lane (TX)
+### -------------------   
+
+### espy DMI.TX.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#0.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+
+### espy DMI.TX.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#1.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+
+### espy DMI.TX.TXPACKS#2.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#2.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#2.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#2.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+   
+### espy DMI.TX.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#3.TXPACK_DEFAULT.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+
+### espy DMI.TX.TXPACKS#4.TXPACK_4.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#4.TXPACK_4.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#4.TXPACK_4.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#4.TXPACK_4.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#4.TXPACK_4.TXPACK.DD.SLICE#4.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+
+### espy DMI.TX.TXPACKS#5.TXPACK_5.TXPACK.DD.SLICE#0.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#5.TXPACK_5.TXPACK.DD.SLICE#1.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#5.TXPACK_5.TXPACK.DD.SLICE#2.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#5.TXPACK_5.TXPACK.DD.SLICE#3.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+### espy DMI.TX.TXPACKS#5.TXPACK_5.TXPACK.DD.SLICE#4.TD.TX_BIT_REGS.TX_LANE_PDWN [when=L] {
+###     spyv;
+###     DISABLED;
+### }
+
+
+#--**************************************************************************************
+#----------------------------------------------------------------------------------------
+#     __                        ____  _            __    __
+#    / /   ____ _____  ___     / __ \(_)________ _/ /_  / /__
+#   / /   / __ `/ __ \/ _ \   / / / / / ___/ __ `/ __ \/ / _ \
+#  / /___/ /_/ / / / /  __/  / /_/ / (__  ) /_/ / /_/ / /  __/
+# /_____/\__,_/_/ /_/\___/  /_____/_/____/\__,_/_.___/_/\___/
+#
+#----------------------------------------------------------------------------------------
+#--**************************************************************************************
+
+# per-lane (RX)
+#ispy DMI.RX.RXCTL.RX_CTL_REGS.RX_LANE_DISABLED_VEC_0_15 [when=L] {
+#    spyv;
+#    0b1111111111111111;
+#}
+
+#ispy DMI.RX.RXCTL.RX_CTL_REGS.RX_LANE_DISABLED_VEC_16_31 [when=L] {
+#    spyv;
+#    0b1111111111111111;
+#}
+
+# per-lane (TX)
+#ispy DMI.TX.TXCTL.TX_CTL_REGS.TX_LANE_DISABLED_VEC_0_15 [when=L] {
+#    spyv;
+#    0b1111111111111111;
+#}
+
+#ispy DMI.TX.TXCTL.TX_CTL_REGS.TX_LANE_DISABLED_VEC_16_31 [when=L] {
+#    spyv;
+#    0b1111111111111111;
+#}
+

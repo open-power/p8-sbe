@@ -1,0 +1,605 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 1
+ChipUnitHierarchy[CORE] = EXP
+
+
+#--******************************************************************************
+#-- Murano DD1 workarounds
+#--******************************************************************************
+
+# Workaround for HW224989 (ISU)
+# Async interrupt might not be processed at correct time without this dial
+# Probably not required/should be removed for performance testing (discuss with Susan).
+# Fixed in Venice DD1
+espy EXP.EC.SD.SDCU_MTMSR_EE_FAST [when=L&& (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  DISABLE;
+}
+
+# LSU DD1-Mode Chickenswitch
+# HW213917 & HW215074
+# Required by LSU for DD1, must be off for DD2
+espy EXP.EC.LS.DISABLE_SDR1_BLOCK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+# LSU lartx/stcx issue
+# HW230426
+espy EXP.EC.LS.LMQ_DIS_LARX_GTAG_MATCH [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy EXP.EC.LS.LMQ_DIS_LARX_ITAG_MATCH [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+# HW238259: default core trace arrays to the correct signals
+# Affects both Murano and Venice DD1
+espy EXP.EC.LS.DEBUG_SETTINGS [when=L] {
+  spyv;
+  ON;
+}
+espy EXP.EC.IFU.I.IFFDM.SCOM_DIAL [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  FIRST_CAPTURE_TOP;
+}
+
+# HW245190: disable fusion ops for the most conservative RISK_LEVEL
+espy EXP.EC.IFU.D.IFDDC0.DIS_FUSION_CS [when=L && RISK_LEVEL==0x0 && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+
+# HW222289 Disable transactional memory store forwarding
+ispy EXP.EC.LS.LSSRQJ.LCBCNTL_BLK.ACT_DIS [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  0b1;
+}
+
+# HW244638 Clock gating bug in SDXIQ
+ispy EXP.EC.SD.SDXIQ.SDXIR0.LCBCNTL_BLK.ACT_DIS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0b1;
+}
+ispy EXP.EC.SD.SDXIQ.SDXIR1.LCBCNTL_BLK.ACT_DIS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0b1;
+}
+
+# HW219886: Disable L2 balance flushes
+espy EXP.EC.LS.LMQ_DIS_L2_DISP_FAIL_CAUSES_B_FLUSH [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+# HW230004
+# Software workaround is available and implemented in PHYP; disabling this fix.
+# espy EXP.EC.SD.SDXSR0_CHSW_SWAPQ_DEPTH_0 [when=L && RISK_LEVEL==0x0 && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+#   spyv;
+#   ON;
+# }
+
+# HW246309
+ispy EXP.EC.IFU.I.IFFPS.LCBCNTL_BLK.ACT_DIS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0b1;
+}
+
+# HW240463; fixed in Venice DD1.0
+espy EXP.EC.SD.SDDD.SDDC.TBEGIN_HOLD_AFTER_UNTIL_GCT_EMPTY [when=L && (RISK_LEVEL==0x0) && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+   spyv;
+   ON;
+}
+espy EXP.EC.SD.SDDD.SDDC.TEND_HOLD_AFTER_UNTIL_GCT_EMPTY [when=L && (RISK_LEVEL==0x0) && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+   spyv;
+   ON;
+}
+espy EXP.EC.SD.SDDD.SDDC.TRECHKPOINT_HOLD_AFTER_UNTIL_GCT_EMPTY [when=L && (RISK_LEVEL==0x0) && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+   spyv;
+   ON;
+}
+
+# HW245963
+espy EXP.EC.PC.PC_S.PMUT(0,1,2,3,4,5,6,7).MULT_MRK_EVALUATE_STATUS_ERR_MSK [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+   spyv;
+   ON;
+}
+espy EXP.EC.PC.PC_S.PMUT(0,1,2,3,4,5,6,7).MULTIPLE_MARKED_INSTR_RIS_ERR_MSK [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+   spyv;
+   ON;
+}
+espy EXP.EC.PC.PC_S.PMUT(0,1,2,3,4,5,6,7).MULTIPLE_MARKED_INSTR_RESBRU_ERR_MSK [when=L && (ec < 0x20 && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE)))] {
+   spyv;
+   ON;
+}
+espy EXP.EC.PC.PC_S.PMUT(0,1,2,3,4,5,6,7).MULTIPLE_MARKED_INSTR_RESLSU_ERR_MSK [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+   spyv;
+   ON;
+}
+
+# HW268356
+espy EXP.EC.PC.PC_S.ITRACE.TOD_STEP_DIS_SPEED_UP_HW268356 [when=L && (IPLMODE==RUNTIME) && ((PU_CHIP_TYPE == MURANO) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20)))] {
+   spyv;
+   ON;
+}
+
+# HW271363
+espy EXP.EC.LS.LSPRQU_CHSW_DIS_THREAD_EN_RESET [when=L && (((PU_CHIP_TYPE == MURANO) && ((ec == 0x20) || (ec == 0x21))) || (PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+   spyv;
+   ON;
+}
+
+# HW271274 (Murano DD2.0 and Venice DD1.0)
+# HW277536 (Murano DD2.1 and Venice DD2.0)
+espy EXP.EC.LS.DISABLE_DERAT_BUSY [when=L] {
+   spyv;
+   ON;
+}
+
+# SW251151: disable_erat_busy workaround (HW271274,HW277536) does not completely mitigate the hang
+espy EXP.EC.LS.LSEMQC_CHSW_DIS_HW215616 [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  ON;
+}
+
+# HW270663 / HW255570
+espy EXP.EC.LS.LSPRQS_CHSW_DISABLE_PMCM_FUNCTION [when=L && ((PU_CHIP_TYPE == MURANO) && ((ec == 0x20) || (ec == 0x21)))] {
+   spyv;
+   ON;
+}
+espy EXP.EC.LS.LSPRQC_CHSW_SPARE_0 [when=L && ((PU_CHIP_TYPE == MURANO) && ((ec == 0x20) || (ec == 0x21)))] {
+   spyv;
+   ON;
+}
+
+# HW274579: Venice DD2.0 will flush to this value
+espy EXP.EC.LS.SRQS_CHSW_ENABLE_TMSYNC_LMQ_DATAHOME_WAIT [when=L && ((PU_CHIP_TYPE == MURANO) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20)))] {
+   spyv;
+   ON;
+}
+
+# HW240944
+espy EXP.EC.LS.LSPRQU_CHSW_ZZC2_FREE_RUN [when=L && ((PU_CHIP_TYPE == MURANO) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20)))] {
+   spyv;
+   ON;
+}
+
+# Fix for HW260593 causes Larkmark performance issues.  This dial reverts to Venice DD1.0 behavior and restores performance.
+espy EXP.EC.LS.LSLMQE_CHSW_MERGE_DISABLE_CONTRIB_TO_BUSY [when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  ON;
+}
+
+# Always disable in cache-contained mode
+# HW274057: Disable on all Murano; Disable on Venice DD1.0
+espy EXP.EC.PC.PC_NE.PMC.CHSW_DIS_CLKSTOP_CORE_PM [when=L && ((avpTestCase == AVP_L2) || (PU_CHIP_TYPE == MURANO) || ((PU_CHIP_TYPE == VENICE) && (ec < 0x20)))] {
+  spyv;
+  ON;
+}
+
+# SDXIP yield issue; disable row 31
+# Affects Venice DD1 and DD2; Murano DD2.0 and DD2.1
+ispy EXP.EC.SD.SDXIC(0,1).FREE_LIST [when=L && (((PU_CHIP_TYPE == MURANO) && (ec > 0x13)) || (PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0x00000001;
+}
+
+# HW286068; issue is in all chips but Murano DD1.x
+espy EXP.EC.LS.DISABLE_DD2_NOT_MY_LPAR_CHANGE [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))] {
+   spyv;
+   ON;
+}
+
+# SW257757; SDAR never updates when in Continuous Sampling mode.  Murano DD2.x and Venice DD2.x
+espy EXP.EC.PC.PC_S.PMUT(0,1,2,3,4,5,6,7).CHSW_HW247130_DISA [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == MURANO))) || (PU_CHIP_TYPE == NAPLES))] {
+   spyv;
+   ON;
+}
+
+# Mask SPURR scaling limit since TOD init/resync can cause this checker to fire
+espy EXP.EC.PC.PC_NW.TFP.SPURR_SCALE_LIMIT_MASK [when=L] {
+   spyv;
+   ON;
+}
+
+#--******************************************************************************
+#-- HBI/Cache-contained customization
+#--******************************************************************************
+
+# Enable CHSW for HW244280 for cache contained cycle repro fix, Murano dd2.0 only for now 07022013
+espy EXP.EC.PC.PC_S.ITRACE.CHSW_DIS_HW244280 [when=L && (PU_CHIP_TYPE == MURANO) && (ec >= 0x20)] {
+  spyv,     expr;
+  ON,       (avpTestCase == AVP_L2);
+}
+
+espy EXP.EC.PC.PC_NE.PMC.CHSW_DIS_CORE_PM [when=L] {
+  spyv,     expr ;
+  ON,       (avpTestCase == AVP_L2);
+}
+
+# Set hang pulse configuration
+espy EXP.EC.PC.PC_NE.FIR.INT_HANG_PULSE_SELECT [when=L] {
+  spyv,     expr ;
+  2_S,      (avpTestCase == AVP_L2);
+}
+
+espy EXP.EC.PC.PC_NE.FIR.NO_TOD_SYNC_FOR_INJECT [when=L] {
+  spyv,     expr;
+  ON,       (avpTestCase == AVP_L2);
+}
+
+# Set Real Mode ERAT pages to 4K (required for HBI and cache-contained testing)
+espy EXP.EC.LS.LSTL2E_CHSW_FORCE_ERAT_4K_PAGE_RMSC [when=L] {
+  spyv,     expr;
+  ON,       ((avpTestCase == AVP_L2) || (IPLMODE == HBI));
+}
+
+espy EXP.EC.PC.PC_NW.SPRD.EN_ATTN                     [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+
+# Enable thread quiesce on ATTN
+espy EXP.EC.PC.PC_NE.TCTL0.QATTN_MODE [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+espy EXP.EC.PC.PC_NE.TCTL1.QATTN_MODE [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+espy EXP.EC.PC.PC_NE.TCTL2.QATTN_MODE [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+espy EXP.EC.PC.PC_NE.TCTL3.QATTN_MODE [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+espy EXP.EC.PC.PC_NE.TCTL4.QATTN_MODE [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+espy EXP.EC.PC.PC_NE.TCTL5.QATTN_MODE [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+espy EXP.EC.PC.PC_NE.TCTL6.QATTN_MODE [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+espy EXP.EC.PC.PC_NE.TCTL7.QATTN_MODE [when=L] {
+  spyv,     expr;
+  ON,        (avpTestCase == AVP_L2);
+}
+
+# HW238457: Murano DD1.x and Venice DD1.x; reduces the likelihood of checkstop due to multiple PMU marks
+ispy EXP.EC.PC.PC_S.PMUT(0,1,2,3,4,5,6,7).PMU_SCOM [when=L] {
+  spyv,     expr;
+  0x100FC0, (ec < 0x20);
+  0x018FC0, any;
+}
+
+# HW248268: Hardware error inject needs clock gating enabled
+espy EXP.EC.PC.PC_NE.FIR.ENABLE_FIR_CLOCKS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+
+# Performance throttling is currently enabled by default and dramatically reducing PC performance.
+# Until this is resolved, the lab will run with throttling disabled.
+espy EXP.EC.SD.SDXIW.UTHROTTLE_DISABLE_THROTTLE_PREFETCH [when=L] {
+  spyv;
+  ON;
+}
+espy EXP.EC.SD.SDXIW.UTHROTTLE_DISABLE [when=L] {
+  spyv;
+  ON;
+}
+espy EXP.EC.SD.SDXIW.UTHROTTLE_DISABLE_THROTTLE_DCBT [when=L] {
+  spyv;
+  ON;
+}
+
+# Hangbuster for HW245288
+espy EXP.EC.SD.SDCH.EN_HL_HANG_BUSTER [when=L && (RISK_LEVEL==0x0) && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+espy EXP.EC.SD.SDCH.HL_HANG_BUST_COUNT_CFG [when=L && (RISK_LEVEL==0x0) && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  OFF;
+}
+espy EXP.EC.SD.SDCH.HL_HANG_BUST_INIT_VAL [when=L && (RISK_LEVEL==0x0) && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  5000;
+}
+espy EXP.EC.SD.SDCH.HL_HANG_BUST_TIER1_ACT [when=L && (RISK_LEVEL==0x0) && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  NTC_FLUSH_ME;
+}
+
+# WAT workaround for SW256365/SW269190
+# Generate another recovery through CORE_FIR[60] if recovery is detected
+ispy EXP.EC.PC.PC_NW.TRACE0.TR.DLBS.LEAF.COMP.MASKA [when=L && (ec >= 0x20)] {
+  spyv;
+  0xFFFFFE;
+}
+ispy EXP.EC.PC.PC_NW.TRACE0.TR.DLBS.LEAF.COMP.PATTERNA [when=L && (ec >= 0x20)] {
+  spyv;
+  0x000001;
+}
+espy EXP.EC.PC.PC_NW.TRACE0.TR.DLBS.LEAF.COMP.MATCHA_MUXSEL [when=L && (ec >= 0x20)] {
+  spyv;
+  BITS_00_TO_23;
+}
+ispy EXP.EC.PC.PC_NW.TRACE0.TR.DLBS.LEAF.COMP.TRIG0_OR_MASK [when=L && (ec >= 0x20)] {
+  spyv;
+  0x8;
+}
+espy EXP.EC.PC.PC_NW.DBG.INST1_FRONTEND_COND1_SELA [when=L && (ec >= 0x20)] {
+  spyv;
+  TA_DBG_TRIGGERS_0;
+}
+ispy EXP.EC.PC.PC_NW.DBG.INST1_FRONTEND_COND1_COUNT [when=L && (ec >= 0x20)] {
+  spyv;
+  0x1;
+}
+espy EXP.EC.PC.PC_NW.DBG.TRACCTRL_INST1_CHECKSTOP [when=L && (ec >= 0x20)] {
+  spyv;
+  INST1_CONDITION1;
+}
+espy EXP.EC.PC.PC_NW.DBG.TRACCTRL_INST2_CHECKSTOP [when=L && (ec >= 0x20)] {
+  spyv;
+  NO_CHECKSTOP;
+}
+espy EXP.EC.PC.PC_NW.DBG.TRACCTRL_INST3_CHECKSTOP [when=L && (ec >= 0x20)] {
+  spyv;
+  NO_CHECKSTOP;
+}
+espy EXP.EC.PC.PC_NW.DBG.TRACCTRL_INST4_CHECKSTOP [when=L && (ec >= 0x20)] {
+  spyv;
+  NO_CHECKSTOP;
+}
+espy EXP.EC.PC.PC_NW.DBG.TRACCTRL_INST_CHECKSTOP [when=L && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+#--******************************************************************************
+#-- Static customization
+#--******************************************************************************
+
+# With en_sys_xstop_clk_stopping=1 and stop_clks_cnt=00 (flush state), EX clocks
+# are not actually stopped, but will cause checkstop to be correctly propagated.
+espy EXP.EC.PC.PC_NE.FIR.EN_SYS_XSTOP_CLK_STOPPING [when=L && (ec < 0x20)] {
+ spyv;
+ ON;
+}
+
+# hang TIMING dials
+# 9F = internal hang = `num2lfsr 4 8`
+# 7B = external hang = `num2lfsr 64 8`
+ispy EXP.EC.PC.PC_NE.TCTL(0,1,2,3,4,5,6,7).CORE_HANG_LIMIT [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0x9F;
+}
+
+ispy EXP.EC.PC.PC_NE.TCTL(0,1,2,3,4,5,6,7).NEST_HANG_LIMIT [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0x7B;
+}
+
+# Performance: exclude dcbz from starting a store stream (HID4[29]=1)
+# HW250931: Runtime image must enable EN_RMSC (HID4[33]=1)
+ispy EXP.EC.LS.HID4_MASTER [when=L && (IPLMODE == RUNTIME)] {
+  spyv;
+  0x0000000440000000;
+}
+
+# Performance: High b/w mode (HID5[13:14]=10); pteg_plus_n=1 prefetching (HID5[30:31]=01)
+ispy EXP.EC.LS.HID5_MASTER [when=L && (IPLMODE == RUNTIME)] {
+  spyv;
+  0x0004000100000000;
+}
+
+# Enable SPURR counting when the system starts
+ispy EXP.EC.PC.PC_NW.L(0,1,2,3)_PMCR [when=L && (IPLMODE == RUNTIME)] {
+  spyv;
+  0x0000400000000000;
+}
+
+# PC checkstop clock stopping TIMING dials
+#
+# "Short" count for IFU, LSI, L2, DISP
+# 3A = lfsr_short=`num2lfsr 30 8`
+# "Long" count for stop clocks
+# 5A = lfsr_long=`num2lfsr 100 8`
+ispy EXP.EC.PC.PC_NE.FIR.STOP_IFU_CNT [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0x3A;
+}
+
+ispy EXP.EC.PC.PC_NE.FIR.STOP_LSU_CNT [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0x3A;
+}
+
+ispy EXP.EC.PC.PC_NE.FIR.STOP_DISP_COMP_CNT [when=L] {
+  spyv;
+  0x00;
+}
+
+ispy EXP.EC.PC.PC_NE.FIR.TELL_L2_DEAD_CNT [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0x3A;
+}
+
+# HW239807 Disable stores into D-cache when at risk level 0
+espy EXP.EC.LS.SRQT_CHSW_STORES_INV_DCAC [when=L && (RISK_LEVEL==0x0) && (PU_CHIP_TYPE == MURANO) && (ec < 0x13)] {
+  spyv;
+  ON;
+}
+
+# HW222338 spec mcf sample 12 misprediction issue
+# HW228258 LocalVeryGood Branch Prediction Mode effects on CountCache
+espy EXP.EC.IFU.I.IFFGR.LOCAL_GOOD_CS [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  DISABLE_LOCAL_GOOD;
+}
+
+# HW252994 will be fixed by a configuration change in the idle hangbuster
+# Murano/Venice DD2 will flush to this state
+espy EXP.EC.SD.SDXIW.EN_RAND_FX_IDLE_NTF [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+espy EXP.EC.SD.SDXIW.EN_RAND_VS_IDLE_NTF [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+
+# HW261711: Core will flush to this state in Murano DD2.1
+espy EXP.EC.LS.SRQS_ENABLE_HW261711_FIX_MODE [when=L && (((ec < 0x21) && (PU_CHIP_TYPE == MURANO)) ||((ec < 0x20) && (PU_CHIP_TYPE == VENICE))) ] {
+  spyv;
+  ENABLE_HW261711_FIX_MODE;
+}
+
+# HW260071: Flush state has been updated for Venice DD2.0
+espy EXP.EC.SD.SDXMQ1.UMAP_CONT_RF_RECOV_ERR_NONRECOV [when=L && ((PU_CHIP_TYPE == MURANO) || ((ec < 0x20) && (PU_CHIP_TYPE == VENICE)))] {
+  spyv;
+  ON;
+}
+
+# HW272232 
+espy EXP.EC.LS.LSPRQC_CHSW_IGNORE_LMQ_FULL [when=L] {
+  spyv;
+  ON;
+}
+
+# HW276530
+espy EXP.EC.LS.LSEXEC(0,1,2,3)_CHSW_DISABLE_TM_WORMHOLE [when=L] {
+  spyv;
+  ON;
+}
+
+# HW261080
+espy EXP.EC.IFU.I.IFFEAC.IFFAC.DISABLE_BHRB_MISS_RETRY [when=L && (((ec > 0x13) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  ON;
+}
+
+# HW268835
+# Needed for Murano DD2.0/DD2.1 and Venice DD2.0
+espy EXP.EC.PC.PC_NW.TFR.CHSW_DIS_HW238250 [when=L && (((ec > 0x13) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  ON;
+}
+
+# HW273424: Required for SMT2 to track completions
+espy EXP.EC.SD.SDCG_FWD_PROG_COMP_BY_THREAD_SET  [when=L] {
+  spyv;
+  DISABLE;
+}
+
+# Required to ensure PPC progress
+espy EXP.EC.SD.SDCS_FWD_PROG_WAIT_PPC_COMPLETE [when=L] {
+  spyv;
+  ENABLE;
+}
+
+# SW258572
+espy EXP.EC.PC.PC_NE.TCTL(0,1,2,3,4,5,6,7).MR_BLOCK_HMI_ON_MAINT [when=L && (IPLMODE == RUNTIME)] {
+  spyv;
+  ON;
+}
+
+# Disable pbt pbt. and waitasec
+espy EXP.EC.SD.SDCA_DIS_ACCELERATOR_SWITCHBOARD [when=L] {
+  spyv;
+  ON;
+}
+
+# Make icswx(.) illegal in problem state
+espy EXP.EC.IFU.I.IFU_HID1_DIS_ICSWX [when=L] {
+  spyv;
+  TREAT_ICSWX_AS_ILLEGAL_OR_LEGAL_BASED_ON_MSR_PR;
+}
+
+# SW305319
+espy EXP.EC.LS.LSSLBC_TLBIEL_ILLEGAL_ENCODE_ERRMASK [when=L] {
+  spyv;
+  ON;
+}
+
+# Core FIR
+# FIR Action Register Decodes: PC
+# (Action0, Action1, Mask)
+# ------------------------
+# (0,0,x) = No Error reported
+# (0,1,0) = Recoverable
+# (1,0,0) = System (Platform) Checkstop
+# (1,1,0) = Local (Core) Checkstop / freeze
+# (x,x,1) = MASKED
+# (0,0,0) = Use this setting for non-implemented bits
+
+# Dynamic LPAR workaround for HW242823 and HW240981 requires DBG_FIR_CHECKSTOP_ON_TRIGGER (bit 60) A0/A1/M = 0/1/0 to initiate system recovery
+ispy EXP.EC.PC.PC_NE.FIR.CORE_ACTION0 [when=L] {
+  spyv,               expr;
+  0xFFFFFFFFFFFFFFF7, (avpTestCase == AVP_L2);
+  0x15AA0C688A448B01, (ec < 0x20);
+  0x15A20C688A448B01, any;
+}
+
+# For DD1.0 change core xstop to system xstop
+ispy EXP.EC.PC.PC_NE.FIR.CORE_ACTION1 [when=L] {
+  spyv,               expr;
+  0x0000000000000008, (avpTestCase == AVP_L2);
+  0xEA54139775980008, (ec < 0x20);
+  0xEA5C139775980000, (IPLMODE == HBI);
+  0xFEFC17F7FF9C8A09, any;
+}
+
+ispy EXP.EC.PC.PC_NE.FIR.CORE_FIRMASK [when=L] {
+  spyv,               expr;
+  0x0000000000000000, (avpTestCase == AVP_L2);
+  0x0001E000002374F6, any;
+}
+
+# HW272349/HW039973: error processing needs WOF to stay set through core recovery
+espy EXP.EC.PC.PC_NE.FIR.WOF_FREEZE_MODE [when=L] {
+  spyv;
+  ON;
+}

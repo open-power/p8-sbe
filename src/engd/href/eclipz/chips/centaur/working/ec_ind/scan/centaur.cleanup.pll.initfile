@@ -1,0 +1,64 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+
+#--------------------------------------------------------------------------------
+# Required keywords/variables
+#--------------------------------------------------------------------------------
+SyntaxVersion = 1
+
+# Define env types:
+define def_SIM    = (U);    # Simulation only
+define def_HW     = (W);    # Hardware
+
+
+#--------------------------------------------------------------------------------
+# Settings for Centaur RX CleanUp PLLs
+#--------------------------------------------------------------------------------
+# DMI RX PLL
+ispy DMI.RX.RXCLKCTL.CUPLL_CTL [when=L ] {
+  spyv,              env,            expr;
+  0x000040000020,    def_SIM,        (dccal_mode == 1);
+  0x000040000000,    def_SIM,        any;
+  0x800044117E20,    def_HW,         (memb_nest_freq == 4000) && (dccal_mode == 1);
+  0x800044117E20,    def_HW,         (memb_nest_freq == 4800) && (dccal_mode == 1);
+  0x000044117E00,    def_HW,         (memb_nest_freq == 4000);
+  0x000044117E00,    def_HW,         (memb_nest_freq == 4800);
+  }
+
+
+#-- *****************************************************************************
+#-- CHANGE HISTORY:
+#-- -----------------------------------------------------------------------------
+#$Log: centaur.cleanup.pll.initfile,v $
+#Revision 1.2  2013/03/06 21:51:41  mfred
+#Adding cleanup PLL settings for DC Calibration.
+#
+#Revision 1.1  2012/12/17 22:48:28  mfred
+#Adding files that were previously combined in centaur.pll.initfile.
+#
+#
+#--

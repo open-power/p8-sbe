@@ -1,0 +1,417 @@
+#!/bin/ksh
+
+# IBM_PROLOG_BEGIN_TAG                                                   
+# This is an automatically generated prolog.                             
+#                                                                        
+# OpenPOWER Project                                             
+#                                                                        
+# Contributors Listed Below - COPYRIGHT 2012,2016                        
+# [+] International Business Machines Corp.                              
+#                                                                        
+#                                                                        
+# Licensed under the Apache License, Version 2.0 (the "License");        
+# you may not use this file except in compliance with the License.       
+# You may obtain a copy of the License at                                
+#                                                                        
+#     http://www.apache.org/licenses/LICENSE-2.0                         
+#                                                                        
+# Unless required by applicable law or agreed to in writing, software    
+# distributed under the License is distributed on an "AS IS" BASIS,      
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        
+# implied. See the License for the specific language governing           
+# permissions and limitations under the License.                         
+#                                                                        
+# IBM_PROLOG_END_TAG                                                     
+
+
+
+
+# Use the Tcl trick to check for CTEPATH \
+if [ -z "$CTEPATH" ]; then \
+echo "Error: hook_indexer requires CTEPATH to be defined"; exit 1; fi
+
+# NB: ? What happened ? Suddenly today (8/8/2011 of gfw153) the CTEPATH Tcl
+# executables require the LD_LIBRARY_PATH to be named or they use the system
+# Tcl libs!
+
+# Use the Tcl trick to execute this script using CTE Tcl 8.4 \
+export LD_LIBRARY_PATH=$CTEPATH/tools/tcl/8.4/lib:$LD_LIBRARY_PATH; \
+exec $CTEPATH/tools/tcl/8.4/bin/tclsh "$0" ${1+"$@"}
+
+set usage "
+The hook_indexer is invoked as
+
+    hook_indexer \[-h\] \[-b <binary>\] \[-m <memory space>\] \[-c <cc_file> \] \[-g\]
+
+where <binary> is a binary that supports 'nm', and <cc_file> is where the
+C++-code will be written.  If <cc_file> is not specified, the C++ code goes to
+stdout. 
+
+The <memory space> indicates the PORE memory space of the binary.  This can
+either be one of the following identifiers:
+
+    otprom seeprom pnor oci
+
+The default is to assume the symbols are for OTPROM.  Note that if the memory
+space is specified as 'pnor' or 'seeprom', then analogous entries for the
+OCI-equivalent addresses of address-based hooks are always generated as well.
+
+The default is to index all address-based hooks and all global symbols.  If
+the -g option is specified then only the global symbol index is created.  This
+is an optimization for Host Boot, which only uses the global symbol index.
+
+HookManager global symbol table entries are prefixed with the memory space and
+a double colon.  For example, 
+
+    otprom::scan0_module
+
+If the memory space is 'pnor' or 'seeprom' then the symbol is also replicated
+as an 'oci' symbol.
+
+If -h is specified then this message is simply printed. 
+"
+
+# The hook_indexer parses the output of 'nm' to 1) extract hook symbols and
+# their addresses, and 2) index all global symbols.  The script generates C++
+# code to initialize the symbols into the HookManager symbol table.
+
+# nm output looks like the below on a 64-bit machine (only 8 hex digits on a
+# 32-bit machine). It is not necessary to use the PORE-specific 'nm'.  Host
+# X86 'nm' works fine for this application, but some people have a private
+# 'nm' on their paths that is apparently not configured to allow foreign
+# objects so we have to force the use of /usr/bin/nm.
+
+# 0000000000000004 a SCRATCH0
+# 0000000000000005 a SCRATCH1
+# 0000000000000006 a SCRATCH2
+# 0000000000000008 a TABLE_BASE_ADDR
+# 0000000000000003 a __HOOK_INDEX__
+# 0000000000000008 t __hook__10_foo.S_1
+# 0000000000000010 t __hook__11_foo.S_2
+# 0000000000000004 t __hook__1_foo.S_0
+# 0000000000000000 T foo
+# 0000000000000004 t loop
+
+#  Hook symbols have the following regular expression form: 
+
+#     __hook__<binary string>_<source_path>_<one or more decimal digits>
+
+# The <binary string> uniquely identifies the hook instance in a <source
+# path>, where <one or more decimal digits> is the sequence number of the hook
+# routine within the source file.  The address is converted to a 48-bit PORE
+# PC memory address before indexing.
+
+# hook_indexer also pulls out all global symbols of symbol types of interest,
+# also for use by programs that use the HookManager.  To understand exactly
+# what is being pulled out, please see the man page for nm - although the code
+# should give a pretty good clue.
+
+# The HookManager data structures and initialization code are specified in a
+# very stylized way, in order to reduce the need to create copies of any of
+# the data in the data structures, and to guarantee that the initialization
+# code is as small as possible.  This technique is designed to reduce code and
+# data space requirements in the event that hooks are required in a
+# space-constrained HBI environment.
+
+
+############################################################################
+#  Utilities
+############################################################################
+
+# Lexicographic sort of the ::hook_list clauses 
+
+proc hook_sort {a b} {
+
+    set a_file $::hooked_files([lindex $a 0])
+    set b_file $::hooked_files([lindex $b 0])
+
+    if {$a_file < $b_file} {
+	return -1
+    } elseif {$a_file > $b_file} {
+	return 1
+    } else {
+	
+	set a_unique [lindex $a 1]
+	set b_unique [lindex $b 1]
+
+	if {$a_unique < $b_unique} {
+	    return -1
+	} elseif {$a_unique > $b_unique} {
+	    return 1
+	} else {
+	    return 0
+	}
+    }
+}
+
+
+############################################################################
+#  The script
+############################################################################
+
+package require cmdline
+
+set options {
+    {h            "Print a help message"}
+    {m.arg otprom "Specify a memory space as otprom, pnor, seeprom or oci, or as a 16-bit memory space descriptor"}
+    {c.arg {}     "Specify the name of the file to receive the C++ code, defaulting to stdout"}
+    {b.arg {}     "The name of the binary to examine; This parameter is required"}
+    {g            "Only index the global symbols"}
+}
+
+set arguments $argv
+set got_options [cmdline::getoptions arguments $options $usage]
+array set opts $got_options
+
+if {$opts(h)} {
+    puts $usage
+    exit
+}
+
+set global_symbols_only $opts(g)
+
+#  Get the arguments and open the output stream if necessary
+
+set binary  $opts(b)
+set cc_file $opts(c)
+set memory_space $opts(m)
+
+if {$binary eq {}} {
+    puts "The -b option (binary file) must be specified"
+    puts $usage
+    exit 1
+}
+
+if {$cc_file eq {}} {
+    set stream stdout
+} else {
+    set stream [open $cc_file w]
+}
+    
+set memory_space1 {}
+set memory_segment1 {}
+switch -exact $memory_space {
+
+    oci {
+	set memory_segment 0x8000
+    }
+    pnor {
+	set memory_space1 oci
+	set memory_segment 0x800b
+	set memory_segment1 0x8000
+    }
+    otprom  {
+	set memory_segment 0x0001
+    }
+    seeprom {
+        set memory_space1 oci
+	set memory_segment 0x800c
+	set memory_segment1 0x8000
+    }
+    pibmem {
+	set memory_segment 0x0008
+    }
+    default {
+	puts "The memory_space '$memory_space' is not recognized"
+	exit 1
+    }
+}
+
+# Process each line of nm output.  This code works for either 32- or 64-bit
+# machines. This process creates arrays ('data-bases') that are later formated
+# into C Code.
+
+set nfiles 0
+set files {}
+
+set hook_list {}
+foreach line [split [exec /usr/bin/nm $binary] \n] {
+	
+    # First check for hooks.  Hooks may be later reprocessed as global
+    # symbols if they also happen to be global.  The hook has both a sequence
+    # number that identfies a hook, and perhaps multiple instances of the hook
+    # indicated by multiple unique occurrences.
+    
+    if {[regexp \
+	{^([[:xdigit:]]{8}|[[:xdigit:]]{16}) (.) __hook__([01]+)_(.*)_(\d+)$} \
+	$line match address type unique_binary file sequence]} {
+
+	set unique 0
+	foreach b [split $unique_binary {}] {
+	    set unique [expr {($unique * 2) + $b}]
+	}
+
+	if {![info exists hooked_files($file)]} {
+	    set hooked_files($file) $nfiles
+	    incr nfiles
+	    lappend files $file
+	}
+
+	set address \
+	    0x[string range $address [expr {[string length $address] - 8}] end]
+
+	lappend hook_list \
+	    [list $file $unique $sequence $memory_segment $address]
+
+	if {$memory_segment1 ne {}} {
+	    lappend hook_list \
+		[list $file $unique $sequence $memory_segment1 $address]
+	}
+
+    }
+
+    # Now deal with global symbols by type
+    
+    if {[regexp \
+	{^([[:xdigit:]]{8}|[[:xdigit:]]{16}) ([BCDTR]) (.*)$} \
+	$line match address type symbol]} {
+	set address \
+	    0x[string range $address [expr {[string length $address] - 8}] end]
+	set symbol_db($memory_space\::$symbol) \
+	    [list $address $memory_segment $type]
+	if {$memory_space1 ne {}} {
+	    set symbol_db($memory_space1\::$symbol) \
+		[list $address $memory_segment1 $type]
+	}
+    }
+}
+
+
+#  Write the C++ file header
+
+puts $stream "// \$Id\$"
+puts $stream "//"
+puts $stream "// File generated by hook_indexer"
+puts $stream "// Arguments : $argv"
+puts $stream "// Generation Date : [exec date]"
+puts $stream ""
+puts $stream "\#include \"hookmanager.H\""
+puts $stream ""
+puts $stream "using namespace vsbe;"
+
+
+set symbols [array names symbol_db]
+set nsymbols [llength $symbols]
+set nhooks [llength $hook_list]
+
+if {!$global_symbols_only} {
+
+    #  Create an array of hooked file names (unless there are no file hooks)
+    
+    if {$nfiles != 0} {
+	
+	puts $stream ""
+	puts $stream "static const char* files\[$nfiles\] = \{"
+	
+	foreach file $files {
+	    puts $stream "\"$file\","
+	}
+	
+	puts $stream "\};"
+    }
+    
+    # Hooks for each file must be sorted in terms of their unique index to
+    # guarantee that they are processed in the proper order.
+    
+    set hook_list [lsort -command hook_sort $hook_list]
+    
+    #  Create an array of hooked addresses
+    
+    puts $stream ""
+    puts $stream "static PoreAddress hooked_addresses\[$nhooks\] = \{"
+    
+    foreach clause $hook_list {
+	foreach {file unique sequence memory_segment address} $clause break
+	puts $stream "\PoreAddress($memory_segment, $address),"
+    }
+    
+    puts $stream "\};"
+    
+    #  Create an array of ExtractedHook structures (unless there are none)
+    
+    if {$nhooks != 0} {
+	
+	puts $stream ""
+	puts $stream "static ExtractedHook exHooks\[$nhooks\] = \{"
+	
+	foreach clause $hook_list {
+	    foreach {file unique sequence} $clause {break}
+	    puts $stream "\{files\[$hooked_files($file)\], $sequence\},"
+	}
+	
+	puts $stream "\};"
+    }
+    
+    #  Create an array of Hook structures
+    
+    puts $stream ""
+    puts $stream "static Hook hooks\[$nhooks\] = \{"
+    
+    for {set i 0} {$i < $nhooks} {incr i} {
+	puts $stream "\{HOOK_FETCH_EXTRACTED, &(exHooks\[$i\]), 0\},"
+    }
+    
+    puts $stream "\};"
+}
+
+#  Create an array of global symbol names
+
+puts $stream ""
+puts $stream "static const char* symbols\[$nsymbols\] = {"
+
+foreach {symbol info} [array get symbol_db] {
+    puts $stream "\"$symbol\","
+}
+
+puts $stream "\};"
+
+
+#  Create an analogous array of global symbol information
+
+puts $stream ""
+puts $stream "static GlobalSymbolInfo info\[$nsymbols\] = {"
+
+set i 0
+foreach {symbol info} [array get symbol_db] {
+    puts $stream "\{PoreAddress([lindex $info 1], [lindex $info 0]), '[lindex $info 2]'\},"
+    incr i
+}
+
+puts $stream "\};"
+
+
+# Finally write the initializer and declare a static initialization object
+
+puts $stream ""
+puts $stream "static void"
+puts $stream "init()"
+puts $stream "\{"
+puts $stream "int i;"
+if {!$global_symbols_only} {
+    puts $stream "FAPI_INF(\"HookManager : \""
+    puts $stream "         \"Indexing hooked addresses for $binary\");"
+    puts $stream "for (i = 0; i < $nhooks; i++) \{"
+    puts $stream "    HookManager::registerHook(hooked_addresses\[i\],"
+    puts $stream "                              &(hooks\[i\]));"
+    puts $stream "\}"
+}
+puts $stream "FAPI_INF(\"HookManager : \""
+puts $stream "         \"Indexing global symbols for $binary\");"
+puts $stream "for (i = 0; i < $nsymbols; i++) {"
+puts $stream "    HookManager::registerGlobalSymbol(symbols\[i\], &(info\[i\]));"
+puts $stream "\}"
+puts $stream "\}"
+puts $stream ""
+puts $stream "static HookInitializer initializer(init);"
+
+
+
+
+
+
+
+
+
+
+
+

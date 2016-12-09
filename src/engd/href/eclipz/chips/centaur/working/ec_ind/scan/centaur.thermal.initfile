@@ -1,0 +1,150 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+
+#--------------------------------------------------------------------------------
+# Required keywords/variables
+#--------------------------------------------------------------------------------
+SyntaxVersion = 1
+
+# Define env types:
+define def_SIM    = (U);    # Simulation only
+define def_HW     = (W);    # Hardware
+
+#--------------------------------------------------------------------------------
+# Settings for TVSENSE - HW255374
+#--------------------------------------------------------------------------------
+
+#espy  TCN.EPS.THERM.OVERFLOW_ERR_MASK [when=L && (ec < 0x20) ] {
+espy  TCN.EPS.THERM.OVERFLOW_ERR_MASK [when=L] {
+  spyv;
+  ON;
+}
+#espy  TCM.EPS.THERM.OVERFLOW_ERR_MASK [when=L && (ec < 0x20) ] {
+#  spyv;
+#  ON;
+#}
+#--------------------------------------------------------------------------------
+# Settings for TVSENSE
+#--------------------------------------------------------------------------------
+# the overrides for TVSENSE came from
+#   CQ 240679(240586) P8 LAB Tuleta:Init value fix for the timeout latches in thermal macro
+#idial TCM.EPS.THERM.L1_TIMEOUT_COUNT {
+#  ring tcm_perv_func {
+#       TCM.EPS.THERM.PWR.COMP.L1_TIMEOUTCNTQ.NLC.L2(0)
+#       TCM.EPS.THERM.PWR.COMP.L1_TIMEOUTCNTQ.NLC.L2(1)
+#       TCM.EPS.THERM.PWR.COMP.L1_TIMEOUTCNTQ.NLC.L2(2)
+#       TCM.EPS.THERM.PWR.COMP.L1_TIMEOUTCNTQ.NLC.L2(3)
+#}
+ispy  TCM.EPS.THERM.L1_TIMEOUT_COUNT [when=L && (ec < 0x20) ] {
+  spyv,     expr;
+  0xF,   any;
+}
+
+ispy  TCM.EPS.THERM.L2_TIMEOUT_COUNT [when=L && (ec < 0x20) ] {
+  spyv,     expr;
+  0xF,   any;
+}
+
+#idial TCM.EPS.THERM.L1_TIMEOUT_COUNT {
+#  ring tcm_perv_func {
+#       TCN.EPS.THERM.PWR.COMP.L1_TIMEOUTCNTQ.NLC.L2(0)
+#       TCN.EPS.THERM.PWR.COMP.L1_TIMEOUTCNTQ.NLC.L2(1)
+#       TCN.EPS.THERM.PWR.COMP.L1_TIMEOUTCNTQ.NLC.L2(2)
+#       TCN.EPS.THERM.PWR.COMP.L1_TIMEOUTCNTQ.NLC.L2(3)
+#}
+ispy  TCN.EPS.THERM.L1_TIMEOUT_COUNT [when=L && (ec < 0x20) ] {
+  spyv,     expr;
+  0xF,   any;
+}
+
+ispy  TCN.EPS.THERM.L2_TIMEOUT_COUNT [when=L && (ec < 0x20) ] {
+  spyv,     expr;
+  0xF,   any;
+}
+
+
+#--------------------------------------------------------------------------------
+# Settings for Centaur Emergency Throttles - HW229436
+#--------------------------------------------------------------------------------
+# idial MBU.MBA01.MBA_SRQ.EMERGENCY_M {
+#    MBU.MBA01.MBA_SRQ.FARB.EMER_NM_MQ.ESC.L2(0:13)
+#}
+ispy  MBU.MBA01.MBA_SRQ.EMERGENCY_M [when=L && (ec < 0x20) ] {
+  spyv,     expr;
+  0x0800,   any;
+}
+ispy  MBU.MBA23.MBA_SRQ.EMERGENCY_M [when=L && (ec < 0x20)] {
+  spyv,     expr;
+  0x0800,   any;
+}
+
+#idial MBU.MBA01.MBA_SRQ.EMERGENCY_N {
+#    MBU.MBA01.MBA_SRQ.FARB.EMER_NM_NQ.ESC.L2(0:14)
+#}
+ispy  MBU.MBA01.MBA_SRQ.EMERGENCY_N [when=L && (ec < 0x20)] {
+  spyv,    expr;
+  0x0040,  any;
+}
+ispy  MBU.MBA23.MBA_SRQ.EMERGENCY_N [when=L && (ec < 0x20) ] {
+  spyv,    expr;
+  0x0040,  any;
+}
+
+#-- *****************************************************************************
+#-- CHANGE HISTORY:
+#-- -----------------------------------------------------------------------------
+#$Log: centaur.thermal.initfile,v $
+#Revision 1.9  2014/01/31 15:14:39  yctschan
+#fix
+#
+#Revision 1.8  2013/06/21 19:15:13  yctschan
+#addedf CQ number to emergncey throttle problem
+#
+#Revision 1.7  2013/06/06 17:44:20  yctschan
+#overflow mask fix
+#
+#Revision 1.6  2013/06/04 15:21:27  bellows
+#changed for DD2, comment change
+#
+#Revision 1.5  2013/05/30 15:17:38  yctschan
+#update thermal
+#
+#Revision 1.4  2013/05/22 20:50:19  bellows
+#Added comment CQ 240586 for thermal timeout counts
+#
+#Revision 1.3  2013/05/10 17:34:08  bellows
+#DD2: Do not override EMERGENCY_N/EMERGENCY_M
+#
+#Revision 1.2  2013/02/20 01:32:38  bellows
+#added  L1_TIMEOUT_COUNT
+#
+#Revision 1.1  2013/01/29 15:19:29  bellows
+#thermal scan
+#
+#
+#
+#--
