@@ -1,0 +1,29 @@
+<!-- $Id: proc_sbe_nest_skewadjust_errors.xml,v 1.2 2014/07/23 19:51:49 jmcgill Exp $ -->
+<!-- Halt codes for proc_sbe_nest_skewadjust -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SKEWADJUST_MAX_STEPS_REACHED</rc>
+    <description>
+      Procedure: proc_sbe_nest_skewadjust
+      Maximum number of coarse skew adjust steps reached
+    </description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SKEW_ADJUST_FAIL, POR_FFDC_OFFSET_NONE</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>

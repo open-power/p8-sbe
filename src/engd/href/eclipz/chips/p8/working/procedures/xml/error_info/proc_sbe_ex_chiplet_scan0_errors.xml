@@ -1,0 +1,25 @@
+<!-- $Id: proc_sbe_ex_chiplet_scan0_errors.xml,v 1.2 2014/07/23 19:51:49 jmcgill Exp $ -->
+<!-- Error definitions for proc_sbe_ex_chiplet_scan0 procedure -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_EX_CHIPLET_SCAN0_TIMEOUT</rc>
+    <description>
+      Procedure: proc_sbe_ex_chiplet_scan0
+      Timed out waiting for run_scan0 bit to clear when doing an EX scan0 flush
+    </description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FLUSH_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+</hwpErrors>

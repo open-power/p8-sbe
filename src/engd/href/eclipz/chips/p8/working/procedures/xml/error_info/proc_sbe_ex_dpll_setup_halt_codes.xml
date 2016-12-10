@@ -1,0 +1,29 @@
+<!-- $Id: proc_sbe_ex_dpll_setup_halt_codes.xml,v 1.3 2014/07/23 19:51:49 jmcgill Exp $ -->
+<!-- Halt codes for proc_sbe_ex_dpll_setup.S -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_DPLL_SETUP_NOLOCK</rc>
+    <description>
+      Procedure: proc_sbe_ex_dpll_setup
+      This error is signalled when the EX DPLL fails to lock after ~150us.
+    </description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_DPLL_LOCK_FAIL, POR_FFDC_OFFSET_USE_P0</collectFfdc>
+    <callout>
+      <target>CHIP</target>  
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE </procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>

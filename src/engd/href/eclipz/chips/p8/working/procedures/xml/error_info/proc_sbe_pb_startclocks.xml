@@ -1,0 +1,25 @@
+<!-- $Id: proc_sbe_pb_startclocks.xml,v 1.3 2014/07/23 19:51:49 jmcgill Exp $ -->
+<!-- Halt codes for proc_sbe_pb_startclocks -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>PROC_SBE_PB_START_CLOCK_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_pb_startclocks
+      Failed to start clocks on PB chiplet.
+    </description>
+    <sbeError/>
+    <collectFfdc>proc_extract_pore_halt_ffdc, pore_state, PORE_HALT_SCAN_FAIL, POR_FFDC_OFFSET_NEST_CHIPLET</collectFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>

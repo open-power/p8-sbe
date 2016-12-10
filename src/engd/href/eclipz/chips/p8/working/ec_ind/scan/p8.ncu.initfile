@@ -1,0 +1,130 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 1
+
+
+#--******************************************************************************
+#-- Murano DD1 workarounds
+#--******************************************************************************
+
+# HW220177 - Disable hang detection for HTM machines
+espy EXP.NC.NCHT.NCHTCTL.DISABLE_HTM_LIVELOCK [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+     spyv;
+     ON;
+}
+
+#FOR LAB BRINGUP ONLY/RISK LEVEL 100
+# Hanging up the statemachines when they receive addr_err for cresp
+# Does not affect behavior of the machines, just what they do after a addr_err cresp which is itself a checkstop
+# purpose is to help make debug easier when the addr_err happens
+espy EXP.NC.NCM.NCLDCTL.LD_HANG_ON_ADDR_ERR_EN [when=L && RISK_LEVEL==0x100] {
+  spyv;
+  ON;
+}
+
+
+espy EXP.NC.NCM.NCXSQCT.STQ_HANG_ON_ADDR_ERR_EN [when=L && RISK_LEVEL==0x100] {
+  spyv;
+  ON;
+}
+
+#--******************************************************************************
+#-- Cache-contained customization
+#--******************************************************************************
+
+# Trash mode init
+espy EXP.NC.NCMISC.NCSCOMS.TRASH_MODE_EN [when=L] {
+     spyv,               expr;
+     ON,                 (avpTestCase == AVP_L2);
+     OFF,                any;
+}
+
+
+#--******************************************************************************
+#-- Static customization
+#--******************************************************************************
+
+# revert to P7 lwsync behavior
+espy EXP.NC.NCM.NCSQCTL.STQ_LWSYNC_NOP_DIS [when=L] {
+    spyv;
+    ON;
+}
+
+# hang pulse setup
+# early
+ispy EXP.NC.NCMISC.NCSCOMS.HANG_POLL_PULSE_DIV [when=L] {
+    spyv;
+    0b0001; # 1
+}
+
+# late, store/load master
+ispy EXP.NC.NCMISC.NCSCOMS.MASTER_CP_DATA_POLL_PULSE_DIV [when=L] {
+    spyv;
+    0b0100; # 4
+}
+
+# late, tlbie snooper
+ispy EXP.NC.NCMISC.NCSCOMS.TLB_SNOOP_DATA_POLL_PULSE_DIV [when=L] {
+    spyv,      expr;
+    0b1000,    (ec < 0x20 && ((PU_CHIP_TYPE == MURANO)||(PU_CHIP_TYPE == VENICE)));   # 8
+    0b01000,   (ec >= 0x20 ||(PU_CHIP_TYPE == NAPLES));  # 8
+}
+
+# late, tlbie master
+ispy EXP.NC.NCMISC.NCSCOMS.MASTER_TLB_DATA_POLL_PULSE_DIV [when=L] {
+    spyv,      expr;
+    0b0000,    (ec < 0x20 && ((PU_CHIP_TYPE == MURANO)||(PU_CHIP_TYPE == VENICE)));   # 16
+    0b00000,   (ec >= 0x20 ||(PU_CHIP_TYPE == NAPLES));  # 16
+}
+
+# NCU FIR Action Register Decodes:
+# (Action0, Action1, Mask)
+# ------------------------
+# (0,0,0) = Checkstop
+# (0,1,0) = Recoverable
+# (1,0,0) = Reserved
+# (1,1,0) = Local (Core) Checkstop / freeze
+# (x,x,1) = MASKED
+
+ispy EXP.NC.NCMISC.NCSCOMS.FIR_ACTION0_REG [when=L] {
+    spyv;
+    0x0000000000000000;
+}
+
+ispy EXP.NC.NCMISC.NCSCOMS.FIR_ACTION1_REG [when=L] {
+    spyv;
+    0x00C8000000000000;
+}
+
+ispy EXP.NC.NCMISC.NCSCOMS.FIR_MASK_REG [when=L] {
+    spyv;
+    0x0F039FC000000000;
+}

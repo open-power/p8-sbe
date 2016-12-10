@@ -1,0 +1,596 @@
+# IBM_PROLOG_BEGIN_TAG                                                   
+# This is an automatically generated prolog.                             
+#                                                                        
+# OpenPOWER Project                                             
+#                                                                        
+# Contributors Listed Below - COPYRIGHT 2012,2016                        
+# [+] International Business Machines Corp.                              
+#                                                                        
+#                                                                        
+# Licensed under the Apache License, Version 2.0 (the "License");        
+# you may not use this file except in compliance with the License.       
+# You may obtain a copy of the License at                                
+#                                                                        
+#     http://www.apache.org/licenses/LICENSE-2.0                         
+#                                                                        
+# Unless required by applicable law or agreed to in writing, software    
+# distributed under the License is distributed on an "AS IS" BASIS,      
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        
+# implied. See the License for the specific language governing           
+# permissions and limitations under the License.                         
+#                                                                        
+# IBM_PROLOG_END_TAG                                                     
+
+
+
+CEN_EC			:=	10 20 21
+CEN_IPLMODE		:=	HBI
+CEN_SCAN_RINGS		:=	tcm_memn_cmsk \
+				tcm_memn_func \
+				tcm_mems_cmsk \
+				tcm_mems_func \
+				tcm_perv_func \
+				tcn_dmi_func \
+				tcn_mbi_func \
+				tcn_mbi_gptr \
+				tcn_mbs_cmsk \
+				tcn_mbs_func \
+				tcn_perv_func\
+				tcn_refr_abst \
+				tcn_refr_func \
+				tcn_refr_time
+#
+# Murano file name related static variables
+#
+S1_EC			:=	10 12 13 20 21
+S1_OVR_EC		:=	10 12 13
+S1_IPLMODE		:=	RUNTIME HBI
+S1_SCAN_RINGS		:=	ab_func_ab \
+				ab_func_ioa \
+				ab_func_perv \
+				ex_abfa_core \
+				ex_cmsk_core \
+				ex_fary_l2 \
+				ex_func_core \
+				ex_func_dpll \
+				ex_func_l3 \
+				ex_func_l3refr \
+				ex_func_perv \
+				ex_lbst_core \
+				pb_cmsk \
+				pb_func_mcr \
+				pb_func_nest \
+				pb_func_nx \
+				pb_func_perv \
+				pci_cmsk \
+				pci_func_iopci \
+				pci_func_perv \
+				pci_lbst \
+				perv_func_occ \
+				perv_func_perv \
+				xb_func_perv \
+				ex_gptr_core \
+				ex_gptr_l2 \
+				ex_gptr_l3 \
+				pci_gptr_pci0 \
+				pci_gptr_pci1 \
+				pci_gptr_pci2 \
+				pb_gptr_pcis \
+				pci_func_pci0 \
+				pci_func_pci1 \
+				pci_func_pci2 \
+				perv_cmsk \
+				perv_lbst \
+				xb_func_pben
+#
+# Venice file name related static variables
+#
+P8_EC			:=	10 20
+P8_OVR_EC		:=	10
+P8_IPLMODE		:=	RUNTIME HBI
+P8_SCAN_RINGS		:=	ab_func_ab \
+				ab_func_ioa \
+				ex_abfa_core \
+				ex_fary_l2 \
+				ex_func_core \
+				ex_func_dpll \
+				ex_func_l3 \
+				ex_func_l3refr \
+				ex_func_perv \
+				pb_cmsk \
+				pb_func_mcl \
+				pb_func_mcr \
+				pb_func_nest \
+				pb_func_nx \
+				pb_func_perv \
+				pci_cmsk \
+				pci_func_perv \
+				pci_lbst \
+				ex_gptr_core \
+				ex_gptr_l2 \
+				ex_gptr_l3 \
+				pci_gptr_pci0 \
+				pci_gptr_pci1 \
+				pci_gptr_pci2 \
+				pb_gptr_pcis \
+				perv_cmsk \
+				perv_func_perv \
+				perv_lbst \
+				ex_lbst_core \
+				pci_func_pci0 \
+				pci_func_pci1 \
+				pci_func_pci2 \
+				xb_func_pben
+#
+# Naples file name related static variables
+#
+N1_EC			:=	10
+N1_OVR_EC		:=	10
+N1_IPLMODE		:=	RUNTIME HBI
+N1_SCAN_RINGS		:=	ab_func_ab \
+				ex_abfa_core \
+				ex_fary_l2 \
+				ex_func_core \
+				ex_func_dpll \
+				ex_func_l3 \
+				ex_func_l3refr \
+				ex_func_perv \
+				ex_gptr_core \
+				ex_gptr_l2 \
+				ex_gptr_l3 \
+				pb_cmsk \
+				pb_func_nest \
+				pb_func_nx \
+				pb_func_perv \
+				pb_gptr_pcis \
+				pci_cmsk \
+				pci_func_perv \
+				pci_lbst \
+				pci_gptr_pci0 \
+				pci_gptr_pci1 \
+				pci_gptr_pci2 \
+				perv_cmsk \
+				perv_func_perv \
+				perv_lbst \
+				xb_func_pben
+
+#
+# Environments to build for
+# Default W = hardware (& simics)
+#	  U = VBU
+# Note: to build for VBU change the value below to 'U' or add ENV=U to the command line mk invocation.
+#
+ENV			:= W
+
+
+############################################################################################
+#
+# Special rules
+#
+############################################################################################
+
+.PHONY:		clean centaur.initfile s1.initfile p8.initfile n1.initfile centaur.sbe_ref.bin.prep %.sbe_ref.bin.prep p8.delta_scan ${UNTAR} %.ADD-RING %.OVR.ex_func_core.ADD-OVR-RING
+# Keep scan rings for future comparison
+.PRECIOUS:	%.bin.srd
+
+############################################################################################
+#
+# Prep / clean up rules
+#
+############################################################################################
+
+#############################################################################################
+# Clean
+#
+clean :
+	@echo ${DATE_TIME} "Cleaning up source and previous build"
+	rm -rf ${CURDIR}
+	mkdir ${CURDIR}
+
+#############################################################################################
+# Unzip href source
+#
+p8.href_untar :
+	@echo ${DATE_TIME} "Untarring EKB source"
+	rm -rf ${EKB_DIR}
+	tar -xzf ${REF_IMAGE_TAR} ${EKB_DIR}
+	tar -xzf ${BIN_UTILS_TAR} ${EKB_DIR}
+	${GEN_SBE_VERS_HTML}
+	rm -rf ${CTE_DIR}
+	@echo ${DATE_TIME} "Untarring needed cte tools"
+	tar -xzf ${CTE_TOOLS_TAR} ${CTE_DIR}
+
+############################################################################################
+#
+# Build tools
+#
+############################################################################################
+
+#############################################################################################
+# EKB makefile modifications to build in ODE and stradale environments
+#
+makefile_ode_mods: ${UNTAR}
+	@echo ${DATE_TIME} "Modifying SBE makefiles for ODE}"
+	# So far only modifications are common to both ODE & stradale.
+
+makefile_stradale_mods: ${UNTAR}
+	@echo ${DATE_TIME} "Modifying SBE makefiles for stradale}"
+
+	# delta scan modifications
+	@echo ${DATE_TIME} "Modifying CC value in delta scan makefiles}"
+	# Add override CC compiler location
+	#cp ${SAMPLE_SUBDIR}/makefile.ecmd.demo ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo
+	#cp ${SAMPLE_SUBDIR}/makefile.ecmd.demo ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo
+	sed 's|^  CC           :=|#  CC           :=|' ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo >| ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo.temp1
+	cp ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo.temp1 ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo
+	sed 's|^  CC           :=|#  CC           :=|' ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo >| ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo.temp1
+	cp ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo.temp1 ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo
+	sed 's|^	CC           :=|#	CC           :=|' ${MOD2SCAN_SUBDIR}/makefile >| ${MOD2SCAN_SUBDIR}/makefile.temp1
+	cp ${MOD2SCAN_SUBDIR}/makefile.temp1 ${MOD2SCAN_SUBDIR}/makefile
+
+	# ifScrubber modification
+	@echo ${DATE_TIME} "Modifying ifScrubber to run outside of ODE environment"
+	${ECHO} patchelf --set-interpreter /lib/ld-linux.so.2 ${IF_SCRUBBER}
+
+	# p8_ipl_build makefile modifications
+	@echo ${DATE_TIME} "Modifying CC value for p8_ipl_build in makefile}"
+	sed 's|^  CC           := /gsa.*/|  CC           := ${CURDIR}/../cc/|' ${IPL_BUILD_SUBDIR}/makefile >| ${IPL_BUILD_SUBDIR}/makefile.temp
+	cp ${IPL_BUILD_SUBDIR}/makefile.temp ${IPL_BUILD_SUBDIR}/makefile
+	
+	# p8_centaur_build makefile modifications
+	@echo ${DATE_TIME} "Modifying CC value for p8_centaur_build in makefile}"
+	sed 's|^  CC           := /gsa.*/|  CC           := ${CURDIR}/../cc/|' ${CEN_BUILD_SUBDIR}/makefile >| ${CEN_BUILD_SUBDIR}/makefile.temp
+	cp ${CEN_BUILD_SUBDIR}/makefile.temp ${CEN_BUILD_SUBDIR}/makefile
+
+makefile_mods : ${BUILD_ENV_MODS}
+
+	# delta scan modifications
+	@echo ${DATE_TIME} "Modifying VPATH in delta scan makefiles}"
+	# Add fips fapi path to VPATH for building
+	cp ${SAMPLE_SUBDIR}/makefile.ecmd.demo ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo
+	cp ${SAMPLE_SUBDIR}/makefile.ecmd.demo ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo
+	sed 's|^VPATH       := $${ECMD_PATH}/capi|VPATH       := $${ECMD_PATH}/capi:${FIPS_EXPORT}|' ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo >| ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo.temp1
+	cp ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo.temp1 ${DELTASCAN_R_SUBDIR}/makefile.ecmd.demo
+	sed 's|^VPATH       := $${ECMD_PATH}/capi|VPATH       := $${ECMD_PATH}/capi:${FIPS_EXPORT}|' ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo >| ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo.temp1
+	cp ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo.temp1 ${DELTASCAN_W_SUBDIR}/makefile.ecmd.demo
+
+	# p8.utilities makefile modifications
+	@echo ${DATE_TIME} "Modifying values for p8.utilitites in makefile}"
+	sed 's|^INCLUDES = |INCLUDES += $${SBE_INCLUDES} |' ${SBE_SUBDIR}/Makefile >| ${SBE_SUBDIR}/Makefile.temp1
+	sed 's|^CFLAGS   = |CFLAGS   += |'                  ${SBE_SUBDIR}/Makefile.temp1 >| ${SBE_SUBDIR}/Makefile.temp2
+	sed 's|^fapiHwpReturnCodes.H:|xfapiHwpReturnCodes.H:|' ${SBE_SUBDIR}/Makefile.temp2 >| ${SBE_SUBDIR}/Makefile.temp3
+	sed 's| fapiHwpReturnCodes.H$$||' ${SBE_SUBDIR}/Makefile.temp3 >| ${SBE_SUBDIR}/Makefile
+	#sed 's|^GCC-DIR|xCC-DIR|' ${SBE_SUBDIR}/Makefile.temp4 >| ${SBE_SUBDIR}/Makefile
+
+#############################################################################################
+# Create delta scan tool executable
+#
+p8.delta_scan :	 ${UNTAR} makefile_mods
+	@echo ${DATE_TIME} "Building delta scan tool"
+	rm -rf ${IPLTOOLS_SUBDIR}/release
+	mkdir -p ${IPLTOOLS_SUBDIR}/release
+	mkdir -p ${IPLTOOLS_SUBDIR}/scanToolFiles
+
+	@echo "CFLAGS = $(CFLAGS)"
+	# Copy needed files to use mybuildecmdprcd
+	cp ${SAMPLE_SUBDIR}/buildecmdprcd ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${UTILS_SUBDIR}/p8_scan_compression.C ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${SBE_SUBDIR}/sbe_xip_image.c ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${P8EKB}/working/procedures/pore_inline_assembler.c ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${UTILS_SUBDIR}/p8_ring_identification.c ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${FAPI}/fapiClientCapi.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${FAPI}/fapiStructs.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${CTEPATH}/tools/ecmd/rel/capi/ecmdClientCapi.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${CTEPATH}/tools/ecmd/rel/capi/ecmdDataBuffer.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${CTEPATH}/tools/ecmd/rel/capi/ecmdReturnCodes.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${CTEPATH}/tools/ecmd/rel/capi/ecmdStructs.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${CTEPATH}/tools/ecmd/rel/capi/ecmdUtils.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${EKB_PATHHEAD}/hwpf/working/fapi/fapiReturnCode.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${EKB_PATHHEAD}/hwpf/working/fapi/fapiReturnCodes.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${EKB_PATHHEAD}/hwpf/working/fapi/fapiReturnCodeDataRef.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${EKB_PATHHEAD}/hwpf/working/fapi/fapiTarget.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+	cp ${CTEPATH}/tools/ecmd/rel/ext/cro/capi/croClientCapi.H ${IPLTOOLS_SUBDIR}/scanToolFiles;
+
+	cp ${IPLTOOLS_SUBDIR}/scanToolFiles/* ${DELTASCAN_R_SUBDIR};
+	cp ${IPLTOOLS_SUBDIR}/scanToolFiles/* ${DELTASCAN_W_SUBDIR};
+	#Build scantool executables
+	cd ${DELTASCAN_R_SUBDIR}; \
+	./buildecmdprcd -r rel -C "p8_scan_compression.C" -c "sbe_xip_image.c, pore_inline_assembler.c, p8_ring_identification.c" p8_delta_scan_r.C
+	cp ${DELTASCAN_R_SUBDIR}/p8_delta_scan_r.x86 ${DELTASCAN_R_SUBDIR}/../release/
+	cd ${DELTASCAN_W_SUBDIR}; \
+	./buildecmdprcd -r rel -C "p8_scan_compression.C,p8_image_help.C,p8_image_help_base.C" -c "sbe_xip_image.c,pore_inline_assembler.c,p8_ring_identification.c" p8_delta_scan_w.C
+	cp ${DELTASCAN_W_SUBDIR}/p8_delta_scan_w.x86 ${DELTASCAN_W_SUBDIR}/../release/
+	cd ${MOD2SCAN_SUBDIR}; make clean; make all
+	cp ${MOD2SCAN_SUBDIR}/modifier2scanselect.x86 ${MOD2SCAN_SUBDIR}/../release/
+	# cronus fapi shared libs are needed by delta_scan_w. Copied to CURDIR.
+	cp ${FAPI}/libfapi_x86.so ${CURDIR}
+	cp ${CTEPATH}/tools/ecmd/rel/lib/libecmd_x86.so ${CURDIR}
+	cp ${CTEPATH}/tools/ecmd/rel/x86/lib/libecmd.so ${CURDIR}
+	@echo ${DATE_TIME} "Delta scan tool build complete"
+#############################################################################################
+# Create sbe_xip_tool and other p8 utilities
+#
+p8.utilities : ${UNTAR} p8.delta_scan
+	@echo ${DATE_TIME} "Building p8 utilities"
+	cd ${SBE_SUBDIR}; gmake clean; gmake utilities HOSTBOOT=1
+	@echo ${DATE_TIME} "p8 utilities build complete"
+#############################################################################################
+# Create p8_ipl_build
+#
+p8.ipl_build : ${UNTAR} p8.delta_scan
+	@echo ${DATE_TIME} "Building p8_ipl_build"
+	cp ${IPLTOOLS_SUBDIR}/scanToolFiles/* ${IPL_BUILD_SUBDIR};
+	cp ${SAMPLE_SUBDIR}/makefile.ecmd.demo ${IPL_BUILD_SUBDIR};
+	cd ${IPL_BUILD_SUBDIR}; \
+	buildecmdprcd -r rel -C "p8_image_help_base.C" -c "sbe_xip_image.c" p8_ipl_build.C
+	cp ${IPL_BUILD_SUBDIR}/p8_ipl_build.x86 ${IPL_BUILD_SUBDIR}/../release/
+	@echo ${DATE_TIME} "p8_ipl_build build complete"
+#############################################################################################
+# Create p8_centaur_build
+#
+p8.centaur_build : ${UNTAR} p8.delta_scan
+	@echo ${DATE_TIME} "Building p8_centaur_build"
+	cp ${IPLTOOLS_SUBDIR}/scanToolFiles/* ${CEN_BUILD_SUBDIR}; 
+	cp ${SAMPLE_SUBDIR}/makefile.ecmd.demo ${CEN_BUILD_SUBDIR};
+	cd ${CEN_BUILD_SUBDIR}; \
+	buildecmdprcd -r rel -C "p8_image_help.C, p8_image_help_base.C, p8_scan_compression.C" -c "sbe_xip_image.c, pore_inline_assembler.c" p8_centaur_build.C
+	cp ${CEN_BUILD_SUBDIR}/p8_centaur_build.x86 ${CEN_BUILD_SUBDIR}/../release/
+	@echo ${DATE_TIME} "p8_centaur_build build complete"
+############################################################################################
+#
+# Generic rules
+#
+############################################################################################
+############################################################################################
+# Insert scan ring into reference image
+#
+ADD_RING_EMPTY = @echo "INFO: Scan ring ${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.bin.srd not referenced by initfiles.  Nothing to insert in reference image."
+ADD_RING_NORMAL = \
+	@echo ${DATE_TIME} "Adding ring ${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.bin.srd to image"; \
+	echo ${DELTASCAN_W_SUBDIR}/p8_delta_scan_w.x86 ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin ${ENV_DIR}/${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.flush.bin.srd ${ENV_DIR}/${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.bin.srd ${RING}_ring ${EC} ${IPLMODE_FLAG} 0 ${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.meta -1 `cat $*.SCANSELECT`00000000 0; \
+	lockfile -r -1 ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin.lock; \
+	${DELTASCAN_W_SUBDIR}/p8_delta_scan_w.x86 ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin ${ENV_DIR}/${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.flush.bin.srd ${ENV_DIR}/${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.bin.srd ${RING}_ring ${EC} ${IPLMODE_FLAG} 0 ${ENV_DIR}/${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.meta -1 `cat $*.SCANSELECT`00000000 0; \
+	rm -f ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin.lock; \
+	rm ${ENV_DIR}/${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.srd
+# The following is needed for gmake (for stradale)
+.PREFIX = $*
+%.RINGADDR : $${.PREFIX}.bin.srd
+	head ${ENV_DIR}/${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.srd | grep ADDRESS | sed 's/ADDRESS//g' >| $@
+%.SCANSELECT : $${.PREFIX}.RINGADDR
+	${MOD2SCAN_SUBDIR}/modifier2scanselect.x86 `cat $*.RINGADDR` | sed 's/.*scanselect=//g' >| $@
+%.bin.srd : $${CHIPTYPE}.sbe_ref.bin.prep $${CHIPTYPE}.initfile
+	# Create scan and flush rings
+	${IF_SCRUBBER} ${CHIPTYPE} ${EC} -i ${CHIPTYPE}.${IPLMODE}.initfile -y ${SPYDEF_FILE} -n ${SCANDEF_FILE} -c ${SCRUBBER_CONFIG_FILE} -d ${RING} -s ${IPLMODE} -v 1 -e ${ENV} -g ${CHIPTYPE}_affected_rings;
+	mv ${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.*srd ${ENV_DIR}/;
+%.ADD-RING : $${.PREFIX}.bin.srd $${CHIPTYPE}.sbe_ref.bin.prep $${CHIPTYPE}.initfile $${.PREFIX}.SCANSELECT
+	@echo ${DATE_TIME} "Processing .ADD-RING $@"
+	# Create metadata
+	@echo Meta data = "${META_DATA_CONTENT}"
+	echo ${META_DATA_CONTENT} > ${ENV_DIR}/${CHIPTYPE}.${EC}.${IPLMODE}.${RING}.meta
+	# Only attempt to insert rings if file length > 0
+	${ADD_RING_CMD}
+	rm -rf $*.RINGADDR
+	rm -rf $*.SCANSELECT
+%.OVR.ex_func_core.ADD-OVR-RING : p8.delta_scan $${CHIPTYPE}.ref_image.temp
+	# Workaround for little endian support.	 Need to add override ring for ex_func_core for 1.x ECs
+	# Added lockfile to synchronize writing of the rings. Without this there were occasional 
+	# failures when more than one ring was added at the same time.
+	lockfile -r -1 ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin.lock 
+	@echo ${DATE_TIME} "Adding ring ${CHIPTYPE}.1x.OVR.ex_func_core.bin.srd for EC ${EC} to image";
+	echo ${META_DATA_CONTENT} > ${ENV_DIR}/${CHIPTYPE}.${EC}.OVR.ex_func_core.meta
+	${DELTASCAN_W_SUBDIR}/p8_delta_scan_w.x86 ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin ${OVR_RING_DIR}/${CHIPTYPE}.1x.OVR.ex_func_core.flush.bin.srd ${OVR_RING_DIR}/${CHIPTYPE}.1x.OVR.ex_func_core.bin.srd ex_func_core_ring ${EC} 1 1 ${ENV_DIR}/${CHIPTYPE}.${EC}.OVR.ex_func_core.meta -1 0400080000000000 0
+	rm -f ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin.lock
+	@echo ${DATE_TIME} "Adding ${CHIPTYPE}.1x.OVR.ex_func_core.bin.srd for EC ${EC} to image complete";
+############################################################################################
+#
+# Rules to create chip specific binaries
+#
+# NOTE: Since s1/p8/n1 rules below are more generic the centaur rules must be listed first
+#	so that they are used rather than the ones for s1/p8/n1.
+#
+############################################################################################
+############################################################################################
+#
+# Centaur binaries
+#
+############################################################################################
+#############################################################################################
+# Create merged initfile
+#
+centaur.initfile : ${UNTAR}
+	@echo ${DATE_TIME} "Generating centaur initfile";
+	${INIT_MERGER} -o centaur.HBI.initfile ${CENTAUR_SCAN_INITS}
+#############################################################################################
+#
+# Create base SBE/SLW image
+#
+centaur.sbe_base.bin : p8.utilities p8.delta_scan
+	@echo ${DATE_TIME} "Building centaur base image"
+	#sed 's|^GCC-DIR|xCC-DIR|' ${CEN_SBE_SUBDIR}/Makefile >| ${CEN_SBE_SUBDIR}/Makefile.temp
+	#cp ${CEN_SBE_SUBDIR}/Makefile.temp ${CEN_SBE_SUBDIR}/Makefile
+	cd ${CEN_SBE_SUBDIR}; gmake clean; gmake sbe_pnor HOSTBOOT=1
+	cp ${CEN_SBE_SUBDIR}/centaur.sbe_pnor.bin ${CEN_SBE_SUBDIR}/centaur.sbe_base.bin
+	# Keep cd and update on same command
+	cd ${CEN_SBE_SUBDIR}; \
+	${BUILD_DATE_TIME_UPDATE}
+	@echo ${DATE_TIME} "Base centaur image build complete"
+#############################################################################################
+#
+# Create reference image
+#
+centaur.sbe_ref.bin.prep : centaur.sbe_base.bin centaur.initfile
+	# Create hdw or vbu dir	
+	mkdir -p ${ENV_DIR};
+	# Start with the base image
+	cp ${CEN_SBE_SUBDIR}/centaur.sbe_base.bin ${ENV_DIR}/centaur.sbe_ref.bin
+	# Insert initfile revision info
+	sbe_xip_tool ${ENV_DIR}/centaur.sbe_ref.bin set initfile_revision  "${INIT_VERSIONS}"
+	# Clear list of affected rings
+	rm -rf ${CHIPTYPE}_affected_rings
+centaur.sbe_ref.bin : centaur.sbe_ref.bin.prep ${CEN_ADD_RINGS}
+	# The ref.bin.prep rule copies the base binary to the ref image binary name so that the
+	# preliminary file exists by the time this rule fires.	That way the phony 'ADD-RINGS'
+	# dependencies can be used insert the scan rings before execution of the rule steps below.
+	# Clean up .dat, text srd and meta data files
+	rm -f *.dat
+	rm -f ${CHIPTYPE}*.meta
+	rm -f ${CHIPTYPE}*.srd
+	rm -f ${ENV_DIR}/${CHIPTYPE}*.flush.bin.srd
+	rm -f ${ENV_DIR}/${CHIPTYPE}*.meta
+	# Verify scan rings by listing binary scan ring dump files
+	ls ${REQUIRED_RINGS}
+	# Add version/prefix header
+	${BUILD_PREFIX_HEADER} -inputFile ${ENV_DIR}/centaur.sbe_ref.bin -outputFile  ${ENV_DIR}/centaur.sbe_ref.hdr.bin
+	@echo "Centaur reference image build complete"
+#############################################################################################
+#
+# Create seeprom binaries
+#
+centaur_%.sbe_seeprom.bin : centaur.sbe_ref.bin p8.centaur_build
+	@echo ${DATE_TIME} "Building centaur seeprom image for EC ${SEEPROM_EC}"
+	# Create binaries
+	p8_centaur_build.x86 ${ENV_DIR}/centaur.sbe_ref.bin ${SEEPROM_EC} ${ENV_DIR}/$@
+	# Add version/prefix headers to binaries
+	${BUILD_PREFIX_HEADER} -inputFile ${ENV_DIR}/$@ -outputFile  ${ENV_DIR}/${SEEPROM_HDR_BIN}
+	@echo ${DATE_TIME} "centaur seeprom image for EC ${SEEPROM_EC} build complete"
+centaur.sbe_seeprom.bin.ALL_ECs : ${CEN_EC_SEEPROM_BINS}
+	cp ${ENV_DIR}/centaur*bin ${CURDIR}/
+	@echo ${DATE_TIME} "Build complete for all centaur seeprom images"
+#########  End of centaur binaries  #########################################################
+############################################################################################
+#
+# S1 / p8 binaries
+#
+############################################################################################
+#############################################################################################
+# Create base SBE/SLW image
+#
+p8.sbe_base.bin : p8.utilities p8.delta_scan
+	@echo ${DATE_TIME} "Building p8 base image"
+	# Don't do clean here. It was done as part of utilities build
+	cd ${SBE_SUBDIR}; gmake sbe_base HOSTBOOT=1
+	@echo ${DATE_TIME} "Overriding build date in sbe image for production builds with EKB tar date/time"
+	# Keep cd and update on same command
+	cd ${SBE_SUBDIR}; \
+	${BUILD_DATE_TIME_UPDATE}
+	@echo ${DATE_TIME} "Base p8 image build complete"
+#############################################################################################
+# Create merged initfiles
+#
+s1.initfile : ${CCI_TEST_OPTION} ${UNTAR}
+	${INIT_MERGER} -o s1.RUNTIME.initfile ${P8_HBI_AND_RUNTIME_SCAN_INITS}
+	${INIT_MERGER} -o s1.HBI.initfile     ${P8_HBI_AND_RUNTIME_SCAN_INITS} ${P8_HBI_ONLY_SCAN_INITS}
+p8.initfile : ${CCI_TEST_OPTION} ${UNTAR}
+	${INIT_MERGER} -o p8.RUNTIME.initfile ${P8_HBI_AND_RUNTIME_SCAN_INITS}
+	${INIT_MERGER} -o p8.HBI.initfile     ${P8_HBI_AND_RUNTIME_SCAN_INITS} ${P8_HBI_ONLY_SCAN_INITS}
+n1.initfile : ${CCI_TEST_OPTION} ${UNTAR}
+	${INIT_MERGER} -o n1.RUNTIME.initfile ${P8_HBI_AND_RUNTIME_SCAN_INITS}
+	${INIT_MERGER} -o n1.HBI.initfile     ${P8_HBI_AND_RUNTIME_SCAN_INITS} ${P8_HBI_ONLY_SCAN_INITS}
+# This rule is used for special concurrent core init test builds.  It defines some unused ring bits
+# so that the test builds know to do special processing.
+# Note: This rule contains ODE syntax and is therefore not supported by stradale
+#
+CCI_P8_INITFILE = ${P8INIT_PATH}/p8.l3.initfile
+cci_test : ${UNTAR}
+	.ifdef CCI_TEST
+#	  This rule modifies spy EXP.L3.L3_MISC.L3CERRS.FIR_MASK_REG setting either:
+#	    bit 30 (for an 'x' driver) or
+#	    bit 29 (for a 'y' driver).
+#	  This modification is achieved by passing 'CCI_TEST=x' (or y) on the mk invocation
+#	  or setting environment variable 'CCI_TEST' to 'x' or 'y'.
+	  @echo "***************************************************************************"
+	  @echo "*"
+	  @echo "*"
+	  @echo "* CCI_TEST defined - modifying ${CCI_P8_INITFILE}"
+	  @echo "*"
+	  .if ${CCI_TEST} == "x"
+	    @echo "* EXP.L3.L3_MISC.L3CERRS.FIR_MASK_REG = 0x32493E23FC000000		# CCI init 'x' driver"
+	  .endif
+	  .if ${CCI_TEST} == "y"
+	    @echo "* EXP.L3.L3_MISC.L3CERRS.FIR_MASK_REG = 0x32493E25FC000000		# CCI init 'y' driver"
+	  .endif
+	  @echo "*"
+	  @echo "***************************************************************************"
+	  sed 's|0x32493E21FC000000|${CCI_TEST:S/^y/0x32493E25FC000000/f:S/^x/0x32493E23FC000000/f}|' ${CCI_P8_INITFILE} >| ${CCI_P8_INITFILE}.temp1
+	  cp ${CCI_P8_INITFILE}.temp1 ${CCI_P8_INITFILE}
+	.endif
+#############################################################################################
+# Create s1 / p8 / n1 reference images from common base SBE/SLW binary
+#
+%.sbe_ref.bin.prep : p8.sbe_base.bin $${CHIPTYPE}.initfile
+	# Create hdw or vbu dir	
+	mkdir -p ${ENV_DIR};
+	# Start with the base image
+	cp ${SBE_SUBDIR}/p8.sbe_base.bin ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin
+	# Insert initfile revision info
+	${SBE_XIP_TOOL} ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin set initfile_revision  "${INIT_VERSIONS}"
+	# Set to skip overrides	 -- LE workaround for DD1.x
+	${SBE_XIP_TOOL} ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin set skip_ex_override_ring_scans 0x8000000000000000
+	# Clear list of affected rings
+	rm -rf ${CHIPTYPE}_affected_rings
+s1.ref_image.bin.ADD-RINGS : $${CHIPTYPE}.sbe_ref.bin.prep ${S1_ADD_RINGS}
+	# This rule adds the scan rings.
+p8.ref_image.bin.ADD-RINGS : $${CHIPTYPE}.sbe_ref.bin.prep ${P8_ADD_RINGS}
+	# This rule adds the scan rings.
+n1.ref_image.bin.ADD-RINGS : $${CHIPTYPE}.sbe_ref.bin.prep ${N1_ADD_RINGS}
+	# This rule adds the scan rings.
+%.ref_image.temp : $${CHIPTYPE}.ref_image.bin.ADD-RINGS
+	# The ref.bin.prep rule copies the base binary to the ref image binary name so that the
+	# preliminary file exists by the time this rule fires.	That way the phony 'ADD-RINGS'
+	# dependencies can be used insert the scan rings before execution of the rule steps below.
+	# The copy below can be removed and this rule can be combined with the following one when 1.x workaround for
+	# Little Endian is no longer needed.
+	# Save image w/o override rings
+	cp ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin ${ENV_DIR}/${CHIPTYPE}.ref_image.no_ovr.bin
+	@echo ${DATE_TIME} "${CHIPTYPE} reference image build complete"
+s1.ref_image.bin.ADD-OVR-RINGS : s1.ref_image.temp ${S1_ADD_OVR_RINGS}
+	# The ADD_OVR_RINGS inserts the override scan rings before execution of the rule below.
+p8.ref_image.bin.ADD-OVR-RINGS : p8.ref_image.temp ${P8_ADD_OVR_RINGS}
+	# The ADD_OVR_RINGS inserts the override scan rings before execution of the rule below.
+n1.ref_image.bin.ADD-OVR-RINGS : n1.ref_image.temp ${N1_ADD_OVR_RINGS}
+	# The ADD_OVR_RINGS inserts the override scan rings before execution of the rule below.
+%.ref_image.bin : $${CHIPTYPE}.ref_image.bin.ADD-OVR-RINGS
+	# Rename binary to match expected name
+	cp ${ENV_DIR}/${CHIPTYPE}.sbe_ref.bin ${ENV_DIR}/${CHIPTYPE}.ref_image.bin
+	# Clean up .dat, text srd and meta data files
+	rm -f *.dat
+	rm -f ${CHIPTYPE}*.srd
+	rm -f ${CHIPTYPE}*.meta
+	rm -f ${ENV_DIR}/${CHIPTYPE}*.flush.bin.srd
+	rm -f ${ENV_DIR}/${CHIPTYPE}*.meta
+	
+	# Verify scan rings by listing binary scan ring dump files
+	ls ${REQUIRED_RINGS}
+	# Add version/prefix header
+	${BUILD_PREFIX_HEADER} -inputFile ${ENV_DIR}/${CHIPTYPE}.ref_image.bin -outputFile ${ENV_DIR}/${CHIPTYPE}.ref_image.hdr.bin
+	@echo ${DATE_TIME} "${CHIPTYPE} reference image complete"
+#############################################################################################
+# Create EC specific PNOR/seeprom images
+#
+%.sbe_seeprom.bin : $${CHIPTYPE_PREF}.ref_image.bin p8.ipl_build
+	@echo ${DATE_TIME} "Building ${CHIPTYPE_PREF} seeprom image for EC ${SEEPROM_EC}"
+	p8_ipl_build.x86 ${ENV_DIR}/${CHIPTYPE_PREF}.ref_image.bin ${SEEPROM_EC} ${ENV_DIR}/$@
+	# Add version/prefix headers to binaries
+	${BUILD_PREFIX_HEADER} -inputFile ${ENV_DIR}/$@ -outputFile  ${ENV_DIR}/${SEEPROM_HDR_BIN}
+	@echo ${DATE_TIME} "${CHIPTYPE_PREF} seeprom image for EC ${SEEPROM_EC} build complete"
+s1.sbe_seeprom.bin.ALL_ECs : ${S1_EC_SEEPROM_BINS}
+	cp ${ENV_DIR}/s1*bin ${CURDIR}/
+	@echo ${DATE_TIME} "Build complete for all centaur seeprom images"
+p8.sbe_seeprom.bin.ALL_ECs : ${P8_EC_SEEPROM_BINS}
+	cp ${ENV_DIR}/p8*bin ${CURDIR}/
+	@echo ${DATE_TIME} "Build complete for all p8 seeprom images"
+n1.sbe_seeprom.bin.ALL_ECs : ${N1_EC_SEEPROM_BINS}
+	cp ${ENV_DIR}/n1*bin ${CURDIR}/
+	@echo ${DATE_TIME} "Build complete for all n1 seeprom images"
+#########  End of s1 / p8 binaries  ########################################################
+# Programs to be built
+OTHERS	 = p8.sbe_base.bin \
+	   p8.ref_image.bin \
+	   p8.sbe_seeprom.bin.ALL_ECs \
+	   n1.ref_image.bin \
+	   n1.sbe_seeprom.bin.ALL_ECs \
+	   s1.ref_image.bin \
+	   s1.sbe_seeprom.bin.ALL_ECs \
+	   centaur.sbe_base.bin \
+	   centaur.sbe_ref.bin \
+	   centaur.sbe_seeprom.bin.ALL_ECs

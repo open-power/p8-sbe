@@ -1,0 +1,491 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+SyntaxVersion = 1
+
+#--------------------------------------------------------------------------------
+# MC Inits
+#--------------------------------------------------------------------------------
+
+# DD1 workaround for HW215386: Parity checking is broken for the MCS HA Producer Consumer Definition Registers (MCHAPCx).
+# -----------------------------------------------------------------------------------------------------------------------
+
+espy MC2.MCS0.LEFT.LEFT.ADDR.MCHAPC0_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS0.LEFT.LEFT.ADDR.MCHAPC1_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS0.LEFT.LEFT.ADDR.MCHAPC2_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS0.LEFT.LEFT.ADDR.MCHAPC3_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS0.LEFT.LEFT.ADDR.MCHAPC4_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS0.LEFT.LEFT.ADDR.MCHAPC5_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC2.MCS1.LEFT.LEFT.ADDR.MCHAPC0_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS1.LEFT.LEFT.ADDR.MCHAPC1_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS1.LEFT.LEFT.ADDR.MCHAPC2_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS1.LEFT.LEFT.ADDR.MCHAPC3_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS1.LEFT.LEFT.ADDR.MCHAPC4_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC2.MCS1.LEFT.LEFT.ADDR.MCHAPC5_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC3.MCS0.LEFT.LEFT.ADDR.MCHAPC0_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS0.LEFT.LEFT.ADDR.MCHAPC1_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS0.LEFT.LEFT.ADDR.MCHAPC2_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS0.LEFT.LEFT.ADDR.MCHAPC3_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS0.LEFT.LEFT.ADDR.MCHAPC4_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS0.LEFT.LEFT.ADDR.MCHAPC5_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC3.MCS1.LEFT.LEFT.ADDR.MCHAPC0_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS1.LEFT.LEFT.ADDR.MCHAPC1_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS1.LEFT.LEFT.ADDR.MCHAPC2_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS1.LEFT.LEFT.ADDR.MCHAPC3_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS1.LEFT.LEFT.ADDR.MCHAPC4_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy MC3.MCS1.LEFT.LEFT.ADDR.MCHAPC5_PE_MASK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+
+
+
+
+
+
+
+# DD1 workaround for HW217824: MCS Default Debug Bus Mux Selects
+#Default MCU mux selects should select bits (0:43) of MCI
+#debug mux 0, from both MCI0(debug (0:43) and MCI1 (debug(44:87))
+# -----------------------------------------------------------------------------------------------------------------------
+
+
+#Enable WAT and debug clocks:
+#putspy pu MC2.MCS0.LEFT.LEFT.WAT.DBG.WAT_ENABLE ON
+espy MC2.MCS0.LEFT.LEFT.WAT.DBG.WAT_ENABLE [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+#putspy pu MC2.MCS0.LEFT.LEFT.WAT.WAT0A.WAT.WAT_ENABLE ON
+espy MC2.MCS0.LEFT.LEFT.WAT.WAT0A.WAT.WAT_ENABLE [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+#Turn on MCS Debug Bus Clocks
+#putspy pu MC2.MCS0.LEFT.LEFT.DEBUG.DEBUG_SELECT 00000000000 -ixl
+ispy  MC2.MCS0.LEFT.LEFT.DEBUG.DEBUG_SELECT  [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv   ;
+  0x00000000000 ;
+}
+
+
+#putspy pu MC2.MCS0.LEFT.LEFT.DEBUG.ENABLE_DEBUG_LAT_CLK ON
+espy MC2.MCS0.LEFT.LEFT.DEBUG.ENABLE_DEBUG_LAT_CLK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+
+#Set debug mux in middle to select input 0, enable debug:
+#putspy pu MC2.MCS0.MIDDLE.DEBUG.DEBUG_SELECT 00000000000 -ixl
+#ispy  MC2.MCS0.MIDDLE.DEBUG.DEBUG_SELECT  [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+#ispy  MC2.MCS0.MIDDLE.DEBUG.DEBUG_SELECT  [when=L && (PU_CHIP_TYPE == MURANO)] {
+#  spyv   ;
+#  0x00000000000 ;
+#}
+
+
+ispy  MC0.MCS0.MIDDLE.DEBUG.DEBUG_SELECT [when=L && (PU_CHIP_TYPE == VENICE) ] {
+  spyv   ;
+  0x55555555555 ;
+}
+
+
+ispy  MC0.MCS1.MIDDLE.DEBUG.DEBUG_SELECT [when=L && (PU_CHIP_TYPE == VENICE) ] {
+  spyv   ;
+  0x55555555555 ;
+}
+
+ispy  MC2.MCS0.MIDDLE.DEBUG.DEBUG_SELECT [when=L && ((PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))  ] {
+  spyv   ;
+  0x55555555555 ;
+}
+
+
+ispy  MC2.MCS1.MIDDLE.DEBUG.DEBUG_SELECT [when=L && ((PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))  ] {
+  spyv   ;
+  0x55555555555 ;
+}
+
+
+
+ispy  MC0.MCS0.MIDDLE.CL.DEBUG.DEBUG_SELECT [when=L && (PU_CHIP_TYPE == VENICE) ] {
+  spyv   ;
+  0x55555555555 ;
+}
+
+
+ispy  MC0.MCS1.MIDDLE.CL.DEBUG.DEBUG_SELECT  [when=L && (PU_CHIP_TYPE == VENICE) ] {
+  spyv   ;
+  0x55555555555 ;
+}
+
+ispy  MC2.MCS0.MIDDLE.CL.DEBUG.DEBUG_SELECT  [when=L && ((PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))  ] {
+  spyv   ;
+  0x55555555555 ;
+}
+
+
+ispy  MC2.MCS1.MIDDLE.CL.DEBUG.DEBUG_SELECT  [when=L && ((PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))  ] {
+  spyv   ;
+  0x55555555555 ;
+}
+
+
+
+#putspy pu MC2.MCS0.MIDDLE.DEBUG.ENABLE_DEBUG_LAT_CLK ON
+espy MC2.MCS0.MIDDLE.DEBUG.ENABLE_DEBUG_LAT_CLK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+
+#Set debug mux in right to select input 0, enable debug:
+#putspy pu MC2.MCS0.RIGHT.DEBUG_MUX.DEBUG_SELECT 00000000000 -ixl
+ispy  MC2.MCS0.RIGHT.DEBUG_MUX.DEBUG_SELECT  [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv   ;
+  0x00000000000 ;
+}
+
+
+#putspy pu MC2.MCS0.RIGHT.DEBUG_MUX.ENABLE_DEBUG_LAT_CLK ON
+espy MC2.MCS0.RIGHT.DEBUG_MUX.ENABLE_DEBUG_LAT_CLK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+#configure MCI to select debug bus 0
+## Config latches at mci_scomfir_rlm. Bits 0 to  5 control debug_mux 0 to 5 .
+##                                    Bits 6 to  7 control mcs wat events 0 to 2 forcing replay
+##                                    Bits 8 to 10 control mcs wat events 0 to 2 forcing noack
+
+#putspy pu MC2.MCS0.RIGHT.MCI.SCOMFIR.CFG_DBG_MUX 8000 -ixl
+ispy  MC2.MCS0.RIGHT.MCI.SCOMFIR.CFG_DBG_MUX   [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv   ;
+  0x8000 ;
+}
+
+ispy  MC0.MCS0.RIGHT.MCI.CFG_DBG_MUX [when=L && (PU_CHIP_TYPE == VENICE) ] {
+  spyv   ;
+  0x8000 ;
+}
+
+
+ispy  MC0.MCS1.RIGHT.MCI.CFG_DBG_MUX [when=L && (PU_CHIP_TYPE == VENICE) ] {
+  spyv   ;
+  0x8000 ;
+}
+
+ispy  MC2.MCS0.RIGHT.MCI.CFG_DBG_MUX [when=L && ((PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))  ] {
+  spyv   ;
+  0x8000 ;
+}
+
+
+ispy  MC2.MCS1.RIGHT.MCI.CFG_DBG_MUX [when=L && ((PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))  ] {
+  spyv   ;
+  0x8000 ;
+}
+
+#Turn on MCS0/MCS1 Debug Bus in MC2
+#putspy pu MC2.MC_DEBUG.ENABLE_DEBUG_LAT_CLK ON
+espy MC2.MC_DEBUG.ENABLE_DEBUG_LAT_CLK [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+
+#Select MCS0 .... debug_select(cfg_lat_q(1:11))
+#putspy pu MC2.MC_DEBUG.DEBUG_SELECT 00000000000 -ib
+ispy  MC2.MC_DEBUG.DEBUG_SELECT    [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv   ;
+  0b00000000000 ;
+}
+
+
+# Setup Trace Compression Care mask for MCS0/MCS1 Downstream read and write valids
+ispy  EH.TPC.TR8.DLBS.LEAF.COMP.COMPRESSION_CARE_MASK  [when=L ] {
+  spyv   ;
+  0x8080000000080800000000 ;
+}
+
+
+
+#Venice DD1
+#HW259884: P8 Lab Brazos: Mirror BAR Scom Parity Error
+# -----------------------------------------------------------------------------------------------------------------------
+#espy MC0.MCS0.LEFT.LEFT.ADDR.MCFGPM_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC0.MCS1.LEFT.LEFT.ADDR.MCFGPM_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+#espy MC1.MCS0.LEFT.LEFT.ADDR.MCFGPM_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC1.MCS1.LEFT.LEFT.ADDR.MCFGPM_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+#espy MC2.MCS0.LEFT.LEFT.ADDR.MCFGPM_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC2.MCS1.LEFT.LEFT.ADDR.MCFGPM_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+#espy MC3.MCS0.LEFT.LEFT.ADDR.MCFGPM_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC3.MCS1.LEFT.LEFT.ADDR.MCFGPM_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC0.MCS0.LEFT.LEFT.ADDR.MCFGP_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC0.MCS1.LEFT.LEFT.ADDR.MCFGP_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+#espy MC1.MCS0.LEFT.LEFT.ADDR.MCFGP_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC1.MCS1.LEFT.LEFT.ADDR.MCFGP_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+#espy MC2.MCS0.LEFT.LEFT.ADDR.MCFGP_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC2.MCS1.LEFT.LEFT.ADDR.MCFGP_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+#espy MC3.MCS0.LEFT.LEFT.ADDR.MCFGP_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+#espy MC3.MCS1.LEFT.LEFT.ADDR.MCFGP_PE_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+#  spyv;
+#  ON;
+#}
+
+
+
+
+
+# DD2 workaround for FW624742: Tuleta:Centaur: Power Bus UEs Results in a Checkstop
+# -----------------------------------------------------------------------------------------------------------------------
+
+espy MC0.MCS0.LEFT.LEFT.ADDR.WDATA_SYN_ERR_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC0.MCS1.LEFT.LEFT.ADDR.WDATA_SYN_ERR_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC1.MCS0.LEFT.LEFT.ADDR.WDATA_SYN_ERR_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC1.MCS1.LEFT.LEFT.ADDR.WDATA_SYN_ERR_MASK [when=L && (PU_CHIP_TYPE == VENICE) && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC2.MCS0.LEFT.LEFT.ADDR.WDATA_SYN_ERR_MASK [when=L && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC2.MCS1.LEFT.LEFT.ADDR.WDATA_SYN_ERR_MASK [when=L && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC3.MCS0.LEFT.LEFT.ADDR.WDATA_SYN_ERR_MASK [when=L && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+
+espy MC3.MCS1.LEFT.LEFT.ADDR.WDATA_SYN_ERR_MASK [when=L && (ec >= 0x20)] {
+  spyv;
+  ON;
+}
+
+
+
+
+
+#*****************************************************************************************

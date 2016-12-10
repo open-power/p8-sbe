@@ -1,0 +1,44 @@
+// $Id: pibmem.link,v 1.4 2012/04/10 01:03:00 bcbrock Exp $
+
+// This linker script creates a binary image image of the PIBMEM.  This script
+// is processed by cpp.
+
+#include "sbe_link.H"
+
+// Need to undefine these so that output formats are not modified!
+#undef powerpc
+#undef pore
+
+#ifdef PGAS_PPC
+OUTPUT_FORMAT(elf32-powerpc);
+#else
+OUTPUT_FORMAT(elf64-pore);
+#endif
+
+//  Define the beginning of PIBMEM and the amount of storage available.
+
+#define origin           PIBMEM_ORIGIN
+#define pibmem_available PIBMEM_SIZE
+
+// The MEMORY command is included simply in order to get linker messages about
+// overflowing sections.  The values below have to be manifest constants.
+
+MEMORY
+{
+    pibmem : ORIGIN = origin, LENGTH = pibmem_available
+}
+
+SECTIONS
+{	
+    .ipl_text : { bin/proc_sbe_pibmem_header.o(.ipl_text) \
+                     *(.ipl_text) } > pibmem
+    .ipl_data : { *(.ipl_data) } > pibmem
+
+    // We require the size of the image to be a multiple of 8 bytes to
+    // guarantee that a fetch of the last address (in the PoreVe) will always
+    // be able to return 8 bytes in the PoreVe.
+
+    . =  ALIGN(8);
+    _pibmem_end = .;
+}
+

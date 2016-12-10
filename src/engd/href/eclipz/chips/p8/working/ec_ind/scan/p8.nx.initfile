@@ -1,0 +1,104 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Required keywords/variables
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+SyntaxVersion = 1
+
+#-----------------------------------------------------------------------
+# Moved to scom for Murano/Venice DD2.0
+#
+#idial  How many hang polls that need to be detected before sending the hang poll to the logic.
+#       0b0000 means send every hang poll to logic
+#  reset value : 0b0000
+#-----------------------------------------------------------------------
+ispy  EN.NX.PBI.CQ_WRAP.HANG_POLL_SCALE           [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0b0000;
+}
+
+#-----------------------------------------------------------------------
+# Moved to scom for Murano/Venice DD2.0
+#
+#idial  How many data polls that need to be detected to indicate a data poll to the logic
+#  reset value : 0b0000
+#----------------------------------------------------------------------
+ispy  EN.NX.PBI.CQ_WRAP.HANG_DATA_SCALE           [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0b0011;
+}
+
+#-----------------------------------------------------------------------
+# Moved to scom for Murano/Venice DD2.0
+#
+#idial  How many data polls that need to be detected to indicate a shm poll to the logic
+#       shim poll is created by the CQ logic to detect hangs of SMs while waiting on exchanges with the shim logic
+#       AMF is the slowest engine, 125M cycles max.  Value of 0b1011 should give 200M cycles before calling out a hang.
+#  reset value : 0b0000
+#-----------------------------------------------------------------------
+ispy  EN.NX.PBI.CQ_WRAP.HANG_SHM_SCALE            [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0b1011;
+}
+
+#-----------------------------------------------------------------------
+#edial  Chickenswitch disabling new response to bkill_inc.  Remove once reset state changed in Venice DD1
+#  reset value : ON
+# Changed reset value to OFF for Venice DD1.0, Murano/Venice DD2.0
+#-----------------------------------------------------------------------
+espy  EN.NX.PBI.CQ_WRAP.NXWR_DISABLE_BKILL_INC   [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv   ;
+  OFF    ;
+}
+
+#-----------------------------------------------------------------------
+#idial The value to compare against LFSR16 bits 1,2,5,9,13, and 15 for the purpose of changing the drop priority
+#  reset value : 0b000000
+#-----------------------------------------------------------------------
+#ispy  EN.NX.PBI.CQ_WRAP.NX_DROP_PRIORITY_MASK     [when=L] {
+#  spyv   ;
+#  0b000000 ;
+#}
+
+#-----------------------------------------------------------------------
+#ldial  Mode register controlling cache injection.
+#       values : cache_inject[_disabled, _indiv, _flow]
+#  reset value : cache_inject_disabled
+# Changed reset value to cache_inject_indiv for Murano/Venice DD2.0
+#-----------------------------------------------------------------------
+espy  EN.NX.PBI.CQ_WRAP.NXCQ_SCOM.CACHE_INJECT_MODE           [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv   ;
+  cache_inject_indiv   ;
+}
+

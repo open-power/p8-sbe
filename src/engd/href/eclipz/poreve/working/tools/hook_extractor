@@ -1,0 +1,381 @@
+#!/usr/bin/tclsh
+
+# IBM_PROLOG_BEGIN_TAG                                                   
+# This is an automatically generated prolog.                             
+#                                                                        
+# OpenPOWER Project                                             
+#                                                                        
+# Contributors Listed Below - COPYRIGHT 2012,2016                        
+# [+] International Business Machines Corp.                              
+#                                                                        
+#                                                                        
+# Licensed under the Apache License, Version 2.0 (the "License");        
+# you may not use this file except in compliance with the License.       
+# You may obtain a copy of the License at                                
+#                                                                        
+#     http://www.apache.org/licenses/LICENSE-2.0                         
+#                                                                        
+# Unless required by applicable law or agreed to in writing, software    
+# distributed under the License is distributed on an "AS IS" BASIS,      
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        
+# implied. See the License for the specific language governing           
+# permissions and limitations under the License.                         
+#                                                                        
+# IBM_PROLOG_END_TAG                                                     
+
+
+
+
+
+############################################################################
+#  Usage
+############################################################################
+
+# The hook_extractor copies standard input to standard output, converting
+# embedded special comments into code snippets that serve as 'hooks' for the
+# PORE virtual environment.
+
+#     hook_extractor [<hook file>]
+
+# hook_extractor takes a single optional argument, which is the name of the
+# file to receive the extracted hook code.  The input for the assembler always
+# streams to stdout. 
+
+# The input to hook_extractor is required to be the output of the C
+# preprocessor (cpp) for a single source file.  In cpp output the first line
+# of the file will be tagged with the source file name as follows:
+
+#    # 1 "<filename>"
+
+# If no argument is given to hook_extractor then the <hook file> is written
+# to <filename>.hook.cc.
+
+
+############################################################################
+#  Code Snippets
+############################################################################
+
+# Code snippets are embedded in the source as special comments.  Each code
+# snippet is converted to a subroutine with the signature:
+
+#     fapi::ReturnCode hook_<N>(const PoreAddress& i_address,
+#                               const HookType i_type,
+#                               Pore& io_pore,
+#                               const fapi::Target& i_target);
+
+# Code snippets become the body of a subroutine that must return a
+# FAPI ReturnCode object.
+
+# A code snippet is recognized as 1 or more contiguous input lines whose first
+# three non-whitespace characters are "##@".  For example:
+
+#     ##@ if (io_pore.d0.read() > 100) {
+#     ##@     FAPI_INF("D0 > 100 : 0x%016llx\n",
+#     ##@              (unsigned long long)(io_pore.d0.read()));
+#     ##@ }
+#     ##@ return hookOk;
+
+# The above snippet would be converted into a hook subroutine:
+
+#     static 
+#     fapi::ReturnCode hook_<N>(const PoreAddress& i_address,
+#                               const HookType i_type,
+#                               Pore& io_pore,
+#                               const fapi::Target& i_target);
+#     {
+#      if (io_pore.d0.read() > 100) {
+#          FAPI_INF("D0 > 100 : 0x%016llx\n",
+#                   (unsigned long long)(io_pore.d0.read()));
+#      }
+#      return hookOk;
+#     }
+
+# The HookManager provides the constant hookOk object that is an 'OK'
+# fapi::ReturnCode. Since the snippet becomes a subroutine body, complex
+# snippets can also include explicit C++ 'return' statements.
+
+
+# The hook_extractor also recognizes a special 'one-liner' marker:
+
+#     ##1@ ... Hook code not containing a newline ...
+
+# This facility can be used to define a HOOK_MARKER macro that allows hooks to
+# be defined as self-contained CPP macros:
+
+#     #define HOOK_MARKER HOOK_INSERT_MARKER(#,#)
+#     #define HOOK_INSERT_MARKER(x,y) x##y##1@
+#     . . .
+#     #define POREVE_INF(...) HOOK_MARKER FAPI_INF(__VA_ARGS__); return hookOk;
+
+# Then in PORE assembly code:
+
+#     ld      D0, 0, A0
+#     POREVE_INF("D0 loaded with 0x%0x16llx\n", io_pore.d0.read());
+#     POREVE_INF("D1 is currently 0x%0x16llx\n", io_pore.d1.read());
+
+# Without the 'one-liner' facility the two hooks above would be merged since
+# there is no blank line between them to terminate the hook.
+
+# In the stdout produced by hook_extractor, a line of the following form is
+# inserted on the final link of the snippet:
+
+#     .hook <Source File>_<Sequence>
+
+# Where <Source File> is the source file name (including extensions, assumed
+# to be .S), and <Sequence> is the linear sequence number of the hook in the
+# current input stream.  The hook is added to the final line of the sequence
+# so that the number of source lines doesn't change. [At first it was thought
+# possible to add a .hook as a new line and tinker with the CPP line markers
+# but we couldn't get it to work (with macros) quickly so went back to the
+# simple approach.]
+
+# NB: The intention is that this string <Source File>_<Sequence> will be
+# unique among all source files processed to create the final collection of
+# hooks. In order to _guarantee_ uniqueness we would have to use the full
+# pathname of the source file.  The problem with doing this is that the string
+# storage might become excessive - but if we're forced to do this by future
+# events we can easily solve the problem then.
+
+
+############################################################################
+#  Verbatim Snippets
+############################################################################
+
+# An option also exists to copy a line verbatim into the hook source.  This
+# option would typically be used to ensure that the correct header files were
+# present for hook compilation.  This option is specified by a line whose
+# first 3 non-whitespace characters are "##`".  For example:
+
+#    ##`#include "myheader.h"
+
+# Would cause the following line to immediately appear in the generated
+# hook source code:
+
+#    #include "myheader.h"
+
+# \bug Need to study cpp line marker nesting, it probably isn't done correctly
+# here. 
+
+
+############################################################################
+#  Caveats
+############################################################################
+
+# Please be aware that hook code after the ##@, ##1@ or ##` tag is being
+# processed by the C pre-processor, in the __ASSEMBLER__ environment. That
+# means that any #defines that are active will be expanded in the hook code
+# immediately here, and not deferred until the hooks are later
+# compiled. Normally this is not a problem since the __ASSEMBLER__ environment
+# typically only defines manifest constants meant to be shared by C and
+# assembler. However if there are #defines whose definitions differ between C
+# and assembler, or whose definitions may differ based on the #includes active
+# during assembly vs. hook compilation, you will get the wrong definition
+# here. If this does become a problem, then one way to get around this would
+# be to hide the offending macro in a function called from the hook.
+
+
+# The HookManager data structures and initialization code are specified in a
+# very stylized way, in order to reduce the need to create copies of any of
+# the data in the data structures, and to guarantee that the initialization
+# code is as small as possible.  This technique is designed to reduce code and
+# data space requirements in the event that hooks are required in a
+# space-constrained HBI environment.
+
+
+############################################################################
+#  Utilities
+############################################################################
+
+#  This routine does a puts to $::snippets and counts how many lines have been
+# put. This is necessary to give correct line number redirection in the
+# snippet file.
+
+proc snippet {s} {
+
+    puts $::snippets $s
+    incr ::hook_file_lines
+}
+
+
+############################################################################
+#  The script
+############################################################################
+
+# First suck in all of stdin and split it into a list.  The first line must be
+# in the form of a cpp line marker that names the path to the source file.
+# The full source_path is used in all comments generated for the C code.  For
+# brevity, only the 'tail' of the path is currently used as a tag in the hook
+# identifiers.
+ 
+set lines [split [read stdin] \n]
+
+if {![regexp {^\# 1 \"(.*)\"} [lindex $lines 0] match source_path]} {
+    error "The standard input does not appear to have come from cpp"
+}
+
+set source_file [file tail $source_path]
+
+
+# If no argument is given then the hook code will be written in a file with
+# the same 'rootname' path as the input file, suffixed with .hook.cc, which is
+# opened for writing.  The header of the hook source file is written.
+
+if {$argv ne {}} {
+    set hook_path [lindex $argv 0]
+} else {
+    set hook_path [file rootname $source_path].hook.cc
+}
+
+if {[catch {set snippets [open $hook_path w]}]} {
+    error "Error opening $hook_path for writing"
+}
+
+set hook_file_lines 1;			# Lines output to hook file
+
+snippet "// \$Id\$"
+snippet "//"
+snippet "// File Generated by hook_extractor"
+snippet "// Source Path     : $source_path"
+snippet "// Generation Date : [exec date]"
+snippet ""
+snippet "\#include \"hookmanager.H\""
+snippet "\#include \"poreve.H\""
+snippet ""
+snippet "using namespace vsbe;"
+snippet ""
+
+
+#  Now iterate over all input lines.  Recall that we always have to hold onto
+#  the last line of hooks seen, so we can modify that line with an instance of
+#  the .hook macro without changing the number of lines in the file.
+
+set hooks 0;				# Hook counter
+set in_hook 0;				# State variable
+set in_verbatim 0;			# State variable
+set last_hook_line {};			# Last line of hook seen
+set hook_code {};			# Code following hook marker
+set cpp_line 0
+set cpp_path ""
+
+foreach line $lines {
+
+    # Check for either the start of or a continuing hook.  Hooks are
+    # tagged with the source file and line number they originated from to
+    # simplify debugging compiler errors from hook compilation.
+    
+    set matched 0
+    set one_liner 0
+    if {[regexp {^\s*\#\#(1)?@(.*)$} $line match one_liner hook_code]} {
+	
+	set matched 1
+	set one_liner [expr {$one_liner eq "1"}]
+
+	if {!$in_hook || $one_liner} {
+	    
+	    set in_hook 1
+	    
+	    snippet "static fapi::ReturnCode"
+	    snippet "hook_${hooks}(const PoreAddress& i_address,"
+	    snippet "              const HookType i_type,"
+	    snippet "              Pore& io_pore,"
+	    snippet "              const fapi::Target& i_target)"
+	    snippet "\{"
+	    snippet "\# $cpp_line \"$cpp_path\""
+
+	} else {
+
+	    puts $last_hook_line
+	}
+	
+	set last_hook_line $line
+	snippet $hook_code
+	set in_verbatim 0
+	
+    }
+    if {!$matched || $one_liner} {
+
+	# If we were in a hook, it needs to be closed now.  The hook
+	# marker is inserted into the assembly input on the last line of the
+	# hook. We also set the file redirection back to the current source
+	# file. 
+	
+	if {$in_hook} {
+	    
+	    puts ".hook ${source_file}_${hooks} $last_hook_line"
+	    incr hooks
+	    
+	    snippet "\}"
+	    snippet "\# $::hook_file_lines \"$hook_path\""
+	    snippet ""
+	}
+	
+	if {!$one_liner} {
+	    puts $line
+	}
+
+	set in_hook 0
+    }
+
+    # If this is a ##` comment also copy the remainder of the line to the
+    # hook source.  If this is the first verbatim comment, we also need to
+    # mark where the block originated
+    
+    if {[regexp {^\s*\#\#\`(.*)$} $line match verbatim]} {
+	
+	if {!$in_verbatim} {
+	    set in_verbatim 1
+	    snippet "\# $cpp_line \"$cpp_path\""
+	}
+	snippet $verbatim
+	
+    } else {
+	set in_verbatim 0
+    }
+    
+    # If this is a cpp line marker record the new cpp line and path, otherwise
+    # increment the cpp line number
+    
+    if {[regexp {^\# (\d*) \"(.*)\"} $line match cpp_line cpp_path]} {
+    } else {
+	incr cpp_line
+    }
+    
+}
+
+
+# The stdin is fully processed at this point.  Create the HookTable.
+
+snippet ""
+snippet "\# $::hook_file_lines \"$hook_path\""
+snippet ""
+snippet "static const char* const file = \"$source_file\";"
+snippet ""
+snippet "static AddressBasedHook hooks\[\] = \{"
+
+for {set i 0} {$i < $hooks} {incr i} {
+    if {$i == ($hooks - 1)} {
+	snippet "hook_${i}"
+    } else {
+	snippet "hook_${i},"
+    }
+}
+
+snippet "\};"
+snippet ""
+snippet "static HookTable table = {$hooks, hooks};"
+
+
+# Generate the function that registers the hooks with the singleton
+# HookManager, and create a static instance of HookInitializer to do the
+# initialization. That's it.
+
+snippet ""
+snippet "static void"
+snippet "init()"
+snippet "\{"
+snippet "FAPI_INF(\"HookManager : \""
+snippet "         \"Registering hook table for $source_path\");"
+snippet "HookManager::registerHookTable(file, &table);"
+snippet "\}"
+snippet ""
+snippet "static HookInitializer initializer(init);"

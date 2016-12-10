@@ -1,0 +1,95 @@
+<!-- $Id: proc_sbe_setup_evid_errors.xml,v 1.5 2015/04/07 17:34:02 jmcgill Exp $ -->
+<!-- Halt codes for proc_sbe_setup_evid -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SET_VID_TIMEOUT</rc>
+    <description>
+      Procedure: proc_sbe_setup_evid
+      Setting EVID during boot timed out on the SPIVID bus
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_O2S_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SPIVID_STATUS_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_setup_evid
+      Errors detected in O2S Status Reg setting Boot Voltage
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_O2S_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SPIVID_WRITE_RETURN_STATUS_ERROR</rc>
+    <description>
+      Procedure: proc_sbe_setup_evid
+      SPIVID Device did not return good status the Boot Voltage Write operation
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_O2S_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>CHIP</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>

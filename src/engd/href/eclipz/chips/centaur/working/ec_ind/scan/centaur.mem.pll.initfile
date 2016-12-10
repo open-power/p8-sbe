@@ -1,0 +1,82 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+
+#--------------------------------------------------------------------------------
+# Required keywords/variables
+#--------------------------------------------------------------------------------
+SyntaxVersion = 1
+
+# Define env types:
+define def_SIM    = (U);    # Simulation only
+define def_HW     = (W);    # Hardware
+
+
+
+#--------------------------------------------------------------------------------
+# Settings for Centaur MEM PLL  (Specified by Output B Frequency)
+#--------------------------------------------------------------------------------
+ispy PLLMEM.PLL_CNTRL0 [when=L ] {
+  spyv,                  env,        expr;
+  0x128000000A0060D3,    def_SIM,    any;
+  0x128000000A0030D2,    def_HW,     (memb_mem_freq == 1066);  # TODO: get correct settings.
+  0x128000000A0050D1,    def_HW,     (memb_mem_freq == 1333);
+  0x128000000A0030D1,    def_HW,     (memb_mem_freq == 1600);  # TODO: get correct settings.
+  0x128000000A0150D5,    def_HW,     (memb_mem_freq == 1866);  # TODO: get correct settings.
+  0x0000000000000000,    def_HW,     any;       # Default to bogus setting
+  }
+ispy PLLMEM.PLL_CNTRL1 [when=L ] {
+  spyv,                  env,        expr;
+  0x7000000200040000,    def_SIM,    any;
+  0x5000000200040002,    def_HW,     (memb_mem_freq == 1066);
+  0x3000000200040002,    def_HW,     (memb_mem_freq == 1333);
+  0x3000000200040002,    def_HW,     (memb_mem_freq == 1600);
+  0xB000000200040002,    def_HW,     (memb_mem_freq == 1866);
+  0x0000000000040000,    def_HW,     any;       # Default to bogus setting
+  }
+ispy PLLMEM.PLL_CNTRL2 [when=L ] {
+  spyv,                  env,        expr;
+  0x00,                  def_SIM,    any;
+  0x00,                  def_HW,     any;
+  }
+
+
+
+#-- *****************************************************************************
+#-- CHANGE HISTORY:
+#-- -----------------------------------------------------------------------------
+#$Log: centaur.mem.pll.initfile,v $
+#Revision 1.3  2013/04/18 17:23:51  p8murano
+#Updates for proper internal vco frequency (v2.2)
+#
+#Revision 1.2  2013/03/28 23:53:52  jeshua
+#set TUNE<13> in MEMPLL for HW245308
+#
+#Revision 1.1  2012/12/17 22:48:30  mfred
+#Adding files that were previously combined in centaur.pll.initfile.
+#
+#
+#--

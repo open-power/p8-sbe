@@ -1,0 +1,28 @@
+<!-- $Id: proc_sbe_scan_service_errors.xml,v 1.2 2015/05/15 15:25:36 jmcgill Exp $ -->
+<!-- Halt codes for proc_sbe_scan_service -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_SBE_SCAN_SERVICE_INVALID_OPERATION</rc>
+    <description>
+      Procedure: proc_sbe_scan_service
+      Invalid PLL configuration requested by caller.
+    </description>
+    <sbeError/>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_SBE_SCAN_SERVICE</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_SBE_SCAN_SERVICE</id>
+    <scomRegister>MBOX_SCRATCH_REG0_0x00050038</scomRegister>
+    <scomRegister>MBOX_SCRATCH_REG1_0x00050039</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+</hwpErrors>

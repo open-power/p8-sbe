@@ -1,0 +1,308 @@
+# IBM_PROLOG_BEGIN_TAG                                                   
+# This is an automatically generated prolog.                             
+#                                                                        
+# OpenPOWER Project                                             
+#                                                                        
+# Contributors Listed Below - COPYRIGHT 2012,2016                        
+# [+] International Business Machines Corp.                              
+#                                                                        
+#                                                                        
+# Licensed under the Apache License, Version 2.0 (the "License");        
+# you may not use this file except in compliance with the License.       
+# You may obtain a copy of the License at                                
+#                                                                        
+#     http://www.apache.org/licenses/LICENSE-2.0                         
+#                                                                        
+# Unless required by applicable law or agreed to in writing, software    
+# distributed under the License is distributed on an "AS IS" BASIS,      
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        
+# implied. See the License for the specific language governing           
+# permissions and limitations under the License.                         
+#                                                                        
+# IBM_PROLOG_END_TAG                                                     
+
+
+
+# $Id: makefile.ecmd.demo,v 1.24 2014/09/19 13:14:42 kahnevan Exp $ 
+# $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/sample/makefile.ecmd.demo,v $
+
+
+# NOTE : To use a non-supported CTE path set CTEPATH env var before calling build
+# NOTE : To use a different ECMD release then the latest set ECMD_RELEASE env var before calling build
+
+# What OS ?
+OS           := $(shell uname)
+# What Site ?
+SITE         := $(shell fs wscell | cut -d\' -f2)
+
+# Make sure they have CTE PATH set, builds won't work without it
+ifeq ($(strip $(CTEPATH)),)
+  $(error "You must have CTEPATH set to run build code!")
+endif
+
+ifeq ($(strip $(OS)),AIX)
+  $(error "AIX is not supported at this time.  Hop on a Linux box and enjoy your day!")
+endif 
+
+NEW_LIB_NAME = 0
+# Are we setup for eCMD, if so let's get our eCMD Release from there
+ifneq ($(strip $(ECMD_RELEASE)),)
+  ECMD_RELEASE := $(shell ecmdVersion full)
+  # Make sure we got a valid version back
+  ifeq ($(findstring ver,$(ECMD_RELEASE)),)
+    ECMD_RELEASE := rel
+  else
+    #check if this is version 14 or later for new library names and paths
+    NEW_LIB_NAME := $(shell expr `echo $(ECMD_RELEASE) | sed -e 's/ver-//' | sed -e 's/-.*//'` \> 13)
+  endif
+else
+# If not setup for eCMD, default to rel
+  ECMD_RELEASE := rel
+endif
+
+# Ok, now set our eCMD Path, if not set already
+ifeq ($(strip $(ECMD_PATH)),)
+  ECMD_PATH   := ${CTEPATH}/tools/ecmd/${ECMD_RELEASE}/
+endif
+
+# Check the ECMD_ARCH env var to see if we should build 32 or 64 bit
+ifeq ($(strip $(ECMD_ARCH)),)
+  ifeq ($(strip $(OS)),AIX)
+    TARGET_ARCH := aix
+  else
+    TARGET_ARCH := x86
+  endif
+else
+  TARGET_ARCH := ${ECMD_ARCH}
+endif
+
+LIB_SUFFIX=
+ifeq (${NEW_LIB_NAME},0)
+  LIB_SUFFIX := _${TARGET_ARCH}
+endif
+
+# check installed version of GNU make
+MAKE_NEEDED   := 3.81
+MAKE_OK       := $(filter $(MAKE_NEEDED),$(firstword $(sort $(MAKE_VERSION) $(MAKE_NEEDED))))
+ifeq ($(strip $(MAKE_OK)),)
+  $(error "GNU make version is ${MAKE_VERSION}, version ${MAKE_NEEDED} or later is required!")
+endif
+
+
+# *****************************************************************************
+# Identify build dir
+# *****************************************************************************
+BUILD_DIR	:= $(shell pwd)
+BUILD_DIR	:= $(abspath $(BUILD_DIR))
+BUILD_DIR       := $(addsuffix /, $(BUILD_DIR))
+
+REPOSITORY_BASE := $(shell echo ${BUILD_DIR} | sed -n 's|\(.*\)/eclipz/chips/\([a-zA-Z0-9]*\)/\([a-zA-Z0-9]*\)/procedures/\(.*\)|\1|p')
+CHIP_NAME       := $(shell echo ${BUILD_DIR} | sed -n 's|\(.*\)/eclipz/chips/\([a-zA-Z0-9]*\)/\([a-zA-Z0-9]*\)/procedures/\(.*\)|\2|p')
+RELEASE_NAME    := $(shell echo ${BUILD_DIR} | sed -n 's|\(.*\)/eclipz/chips/\([a-zA-Z0-9]*\)/\([a-zA-Z0-9]*\)/procedures/\(.*\)|\3|p')
+
+# make sure build directory structure was interpreted correctly, builds won't work without it
+ifeq ($(strip $(REPOSITORY_BASE)),)
+  $(error "Error determining REPOSITORY_BASE from path!")
+endif
+
+ifeq ($(strip $(CHIP_NAME)),)
+  $(error "Error determining CHIP_NAME from path!")
+endif
+
+ifeq ($(strip $(RELEASE_NAME)),)
+  $(error "Error determining RELEASE_NAME from path!")
+endif
+
+# *****************************************************************************
+# Define our source and includes
+# *****************************************************************************
+XTRA_DEFINES   :=
+TARGET_SOURCE  := demo.C
+ECMD_INCLUDES  := fapiClientCapi.H fapiStructs.H \
+		  ecmdClientCapi.H ecmdDataBuffer.H ecmdReturnCodes.H ecmdStructs.H \
+		  ecmdUtils.H fapiClientCapi.H fapiReturnCode.H fapiReturnCodeDataRef.H fapiTarget.H fapiReturnCodes.H croClientCapi.H
+UTIL_SOURCE    := prcdUtils.C
+UTIL_INCLUDES  := prcdUtils.H
+
+# dependent cpp and c source files for which object files need to be built
+XTRA_SOURCE_CPP :=
+XTRA_SOURCE_C   :=
+
+# each dependent source file is expected to have a corresponding header 
+##ifneq ($(strip $(XTRA_SOURCE)),)
+##  XTRA_INCLUDES   = $(basename $(XTRA_SOURCE))
+##  XTRA_INCLUDES  := $(addsuffix .H, $(XTRA_INCLUDES))
+##endif
+
+# *****************************************************************************
+# The Linux Setup stuff
+# *****************************************************************************
+ifeq (${OS},Linux)
+  ifeq (${TARGET_ARCH},x86)
+    CC_VER   := 4.1.2
+    ifeq (${CC_VER},4.4.7)
+      GSACELL  := $(shell cat /usr/gsa/etc/gsa.conf | grep cellname | cut -d" " -f2 | cut -d. -f1)
+      CC       := /usr/bin/g++
+      CFLAGS   := ${CFLAGS} -m32
+      LDFLAGS  := -m32
+    else ifeq (${CC_VER},4.1.2)
+      ifeq ($(wildcard /etc/ldap.conf), )
+        ifeq ($(wildcard /usr/gsa/etc/gsa.conf), )
+          GSACELL    := ausgsa
+        else
+          GSACELL  := $(shell cat /usr/gsa/etc/gsa.conf | grep cellname | cut -d" " -f2 | cut -d. -f1)
+        endif
+      else
+        GSACELL    := $(shell cat /etc/ldap.conf | grep "host " | cut -d" " -f2 | cut -d. -f1)
+      endif
+      CC           := /gsa/${GSACELL}/projects/e/ecmd/utils/gcc-4.1.2-glibc-2.3.2/i686-pc-linux-gnu/bin/i686-pc-linux-gnu-g++  
+    endif
+  else ifeq (${TARGET_ARCH},x86_64)
+    CC       := /opt/rh/devtoolset-2/root/usr/bin/g++
+    CFLAGS   := ${CFLAGS} -m64 -fPIC
+    LDFLAGS  := ${LDFLAGS} -m64 -fPIC
+  else
+    $(error "Error!  Invalid TARGET_ARCH")
+  endif
+
+  LDFLAGS      := ${LDFLAGS} -ldl -L../capi/export -lfapi${LIB_SUFFIX} -lecmd${LIB_SUFFIX} -rdynamic -lpthread
+  CFLAGS       := ${CFLAGS} -ftemplate-depth-30 -Wall
+endif
+
+# *****************************************************************************
+# The Aix Setup stuff
+# *****************************************************************************
+ifeq (${TARGET_ARCH},aix)
+  GSACELL      := $(shell cat /usr/gsa/etc/gsa.conf | grep cellname | cut -d" " -f2 | cut -d. -f1)
+  CC           := /gsa/${GSACELL}/projects/e/ecmd/utils/vacpp.7002/usr/vacpp/bin/xlC
+
+  ### try rearranging the order of these flags below to get aix working.
+  LDFLAGS      := -brtl -w -L../capi/export -lecmd${LIB_SUFFIX} -Wl,-bmaxdata:0x80000000 -bdynamic  -bexpall
+  CFLAGS       := ${CFLAGS} -+ -qstaticinline -qnoinline -M -qmakedep   -Wl,-bmaxdata:0x80000000 -bdynamic -bexpall
+endif
+
+TARGET       := demo.${TARGET_ARCH}
+SUBDIR       := obj_${TARGET_ARCH}/
+ECMD_ARCHIVE := ecmdClientCapi${LIB_SUFFIX}.a fapiClientCapi${LIB_SUFFIX}.a croClientCapi${LIB_SUFFIX}.a 
+
+ifeq (${NEW_LIB_NAME},0)
+  LDFLAGS := ${LDFLAGS} -L${ECMD_PATH}/lib -L${ECMD_PATH}/ext/fapi/capi
+else
+  LDFLAGS := ${LDFLAGS} -L${ECMD_PATH}/${TARGET_ARCH}/lib
+endif
+
+# *****************************************************************************
+# Object Build Targets
+# *****************************************************************************
+TARGET_SOURCE_OBJS  = $(basename $(TARGET_SOURCE))
+TARGET_SOURCE_OBJS := $(addprefix $(SUBDIR), $(TARGET_SOURCE_OBJS))
+TARGET_SOURCE_OBJS := $(addsuffix .o, $(TARGET_SOURCE_OBJS))
+UTIL_SOURCE_OBJS    = $(basename $(UTIL_SOURCE))
+UTIL_SOURCE_OBJS   := $(addprefix $(SUBDIR), $(UTIL_SOURCE_OBJS))
+UTIL_SOURCE_OBJS   := $(addsuffix .o, $(UTIL_SOURCE_OBJS))
+XTRA_SOURCE_CPP_OBJS  = $(basename $(XTRA_SOURCE_CPP))
+XTRA_SOURCE_CPP_OBJS := $(addprefix $(SUBDIR), $(XTRA_SOURCE_CPP_OBJS))
+XTRA_SOURCE_CPP_OBJS := $(addsuffix .o, $(XTRA_SOURCE_CPP_OBJS))
+XTRA_SOURCE_C_OBJS    = $(basename $(XTRA_SOURCE_C))
+XTRA_SOURCE_C_OBJS   := $(addprefix $(SUBDIR), $(XTRA_SOURCE_C_OBJS))
+XTRA_SOURCE_C_OBJS   := $(addsuffix .o, $(XTRA_SOURCE_C_OBJS))
+
+# Setup VPATH
+
+ifeq ($(strip $(ECMD_PLUGIN)),cro)
+# Cronus plugin specific setup
+CRONUS_PATH    := $(shell echo ${ECMD_EXE} | sed -n "s|\([a-zA-Z0-9]*\)\(_*\)\([a-zA-Z0-9]*\)_${TARGET_ARCH}\.exe|prcd_d|p")
+ifeq ($(strip $(CRONUS_PATH)),)
+  $(error "Error determining CRONUS_PATH from env!")
+endif
+VPATH          := ${CRONUS_PATH}
+endif 
+
+# eCMD archives
+VPATH       := ${VPATH}:${ECMD_PATH}/${TARGET_ARCH}/lib
+# eCMD c-api
+VPATH       := ${VPATH}:${ECMD_PATH}/capi
+# FAPI extension
+VPATH       := ${VPATH}:${ECMD_PATH}/ext/fapi/capi
+# Cronus extension
+VPATH       := ${VPATH}:${ECMD_PATH}/ext/cro/capi
+# objs subdir
+VPATH       := ${VPATH}:${SUBDIR}
+# procedure library utils
+VPATH       := ${VPATH}:${REPOSITORY_BASE}/eclipz/chips/common/${RELEASE_NAME}/procedures
+VPATH       := ${VPATH}:${REPOSITORY_BASE}/eclipz/hwpf/working/hwp
+VPATH       := ${VPATH}:${REPOSITORY_BASE}/eclipz/hwpf/working/hwp/mvpd_accessors
+VPATH       := ${VPATH}:${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures
+VPATH       := ${VPATH}:${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures/utils
+VPATH       := ${VPATH}:${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures/ipl/sbe
+VPATH       := ${VPATH}:${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures/ipl/fapi
+
+# Include dirs
+CFLAGS      := ${CFLAGS} -g 
+# Cronus extension
+CFLAGS      := ${CFLAGS} -I${ECMD_PATH}/capi
+CFLAGS      := ${CFLAGS} -I${ECMD_PATH}/ext/cro/capi/ 
+CFLAGS      := ${CFLAGS} -I${ECMD_PATH}/ext/fapi/capi/ 
+# current directory
+CFLAGS      := ${CFLAGS} -I.
+# parent directory (needed for compilation of FAPI wrappers)
+CFLAGS      := ${CFLAGS} -I../
+# base procedure directories
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/chips/centaur/${RELEASE_NAME}/procedures
+# procedure library utils
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/chips/common/${RELEASE_NAME}/procedures
+# SBE image manipulation tools
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/hwpf/working/hwp
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/hwpf/working/hwp/mvpd_accessors
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures/utils
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures/utils/wrapper
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures/ipl/sbe
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures/ipl/fapi
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/chips/p8/${RELEASE_NAME}/procedures/ipl/fapi/wrapper
+# poreve
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/poreve/${RELEASE_NAME}/poreve
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/poreve/${RELEASE_NAME}/model
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/poreve/${RELEASE_NAME}/pore_model/ibuf
+CFLAGS      := ${CFLAGS} -I${REPOSITORY_BASE}/eclipz/poreve/${RELEASE_NAME}/fapiporeve
+
+# *****************************************************************************
+# The Main Targets
+# *****************************************************************************
+all: dir ${TARGET}
+#	@ls | grep "\."o$ | xargs -i mv {} ${SUBDIR}/
+#	@ls | grep "\."u$ | xargs -i mv {} ${SUBDIR}/
+
+dir:
+	@mkdir -p ${SUBDIR}
+
+clean:	
+	@echo "Removing files for demo ..."
+	-rm ${TARGET}
+	-rm ${TARGET_SOURCE_OBJS}
+        ifneq ($(strip $(XTRA_SOURCE_CPP)),)
+	-rm ${XTRA_SOURCE_CPP_OBJS}
+        endif
+        ifneq ($(strip $(XTRA_SOURCE_C)),)
+	-rm ${XTRA_SOURCE_C_OBJS}
+        endif
+
+# *****************************************************************************
+# Create the Client 
+# *****************************************************************************
+${TARGET}: ${TARGET_SOURCE_OBJS} ${XTRA_SOURCE_CPP_OBJS} ${XTRA_SOURCE_C_OBJS} ${UTIL_SOURCE_OBJS} ${ECMD_ARCHIVE}
+	 ${CC} ${XTRA_DEFINES} ${LDFLAGS} $^ -o $@ 
+
+# *****************************************************************************
+# Compile code for the common C++ objects if their respective
+# code has been changed.  Or, compile everything if a header
+# file has changed.
+# *****************************************************************************
+${TARGET_SOURCE_OBJS}: ${SUBDIR}%.o : %.C ${ECMD_INCLUDES} ${XTRA_INCLUDES} ${UTIL_INCLUDES} 
+	${CC} -c ${CFLAGS} ${XTRA_DEFINES} $< -o $@
+${XTRA_SOURCE_CPP_OBJS}: ${SUBDIR}%.o : %.C ${ECMD_INCLUDES} ${XTRA_INCLUDES} ${UTIL_INCLUDES} 
+	${CC} -c ${CFLAGS} ${XTRA_DEFINES} $< -o $@
+${XTRA_SOURCE_C_OBJS}: ${SUBDIR}%.o : %.c ${ECMD_INCLUDES} ${XTRA_INCLUDES} ${UTIL_INCLUDES} 
+	${CC} -c ${CFLAGS} ${XTRA_DEFINES} $< -o $@
+${UTIL_SOURCE_OBJS}: ${SUBDIR}%.o : %.C ${UTIL_INCLUDES}
+	${CC} -c ${CFLAGS} $< -o $@

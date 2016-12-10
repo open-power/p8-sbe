@@ -1,0 +1,460 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+#--
+#-- Required keywords/variables
+#--
+#-- -----------------------------------------------------------------------------
+#--******************************************************************************
+#-- -----------------------------------------------------------------------------
+
+SyntaxVersion = 1
+InstanceHierarchy = EM
+
+
+#--******************************************************************************
+#-- Add dials here
+#--******************************************************************************
+
+# These can be set by the user at debug time
+#espy EXP.TP.ECO_DOM.OHA.ENABLE_HTM_TRACE_ON_INT_STATE_CHANGE  [when=L] {
+# spyv ;
+# ON  ;
+# }
+#espy EXP.TP.ECO_DOM.OHA.ENABLE_HTM_TRACE_ON_FREQU_RANGE_CHANGE  [when=L] {
+#  spyv ;
+#  ON  ;
+#}
+
+# TODO: Check and remove
+# Ralf Maier 2011/08/08
+### Can be enabled regardless of if sleep/winkle is enabled (according to Tilman 1/26/2011)
+#espy EXP.TP.ECO_DOM.OHA.ENABLE_ARCH_IDLE_MODE_SEQUENCER  [when=L] {
+#spyv;
+#  ON ;
+#}
+
+
+# TODO: Check and remove
+# Ralf Maier 2011/08/08
+### used for error handling
+#espy EXP.TP.ECO_DOM.OHA.ENABLE_IGNORE_RECOV_ERRORS [when=L] {
+#   spyv ;
+#   ON  ;
+#}
+## used for error handling
+#espy EXP.TP.ECO_DOM.OHA.ENABLE_SUPPRESS_PURGES_AND_PCB_FENCE [when=L] {
+#   spyv ;
+#   ON  ;
+#}
+
+
+## OHA_MODE_REG
+## treat sleep as nap if sleep and legacy sleep enables are off
+#espy EXP.TP.ECO_DOM.OHA.TREAT_SLEEP_AS_NAP [when=L] {
+#  spyv, expr;
+#  ON, (SLEEP_ENABLE == 0);
+#}
+## OHA_MODE_REG
+## treat sleep as nap if sleep
+# SW253109
+#espy EXP.TP.ECO_DOM.OHA.TREAT_SLEEP_AS_NAP [when=L && (IPLMODE==RUNTIME)] {
+#    spyv, expr;
+#    ON;
+#}
+#
+### treat winkle as sleep if winkle enable is off
+#espy EXP.TP.ECO_DOM.OHA.TREAT_WINKLE_AS_SLEEP [when=L] {
+#   spyv, expr ;
+#   ON, (WINKLE_ENABLE == 0)  ;
+#}
+
+
+#--******************************************************************************
+#-- DPLL (spys removed from dpll_init when moved into cfaminit)
+#--******************************************************************************
+
+# TODO: revisit
+# this needs to be a 4 for freq_read- smolski.
+#ispy EXP.TP.ECO_DOM.OHA.POWER_PROXY_TOD_TIME_INTERVAL_MATCH_VAL [when=L] {
+#        spyv ;
+#        0b00000000000100 ;
+#}
+
+# TODO: move to PCBS init
+# bypass is cleared in startclocks
+# espy EXP.TP.ECO_DOM.OHA.FF_BYPASSXPI  [when=L] {
+#        spyv ;
+#        ON  ;
+#}
+
+# ispy EXP.TP.ECO_DOM.OHA.LF_SLEWRATEXPI  [when=L] {
+#        spyv ;
+#        0x08  ;
+#}
+
+# TODO: Check and remove
+# Ralf Maier 2011/08/08
+### OHA_DPLL_CPM_MODE_REG, Start with 0x2 in the lab
+#ispy EXP.TP.ECO_DOM.OHA.CPM_BIT_SEL [when=L] {
+#        spyv;
+#        0x2;
+#}
+
+#--******************************************************************************
+# Settings for architected idle modes
+#--******************************************************************************
+
+
+## Work-around to initiaize PCBS-PM in the winkle state (Murano HW231476)
+ispy EXP.TP.ECO_DOM.OHA.TC_TP_CHIPLET_PM_STATE   [when=L] {
+       spyv;
+       0b0001;
+}
+
+ispy EXP.TP.ECO_DOM.OHA.HW276505_DIS [when=L && (PU_CHIP_TYPE == VENICE) && (ec >= 0x20)] {
+   spyv;
+   0b1;
+}
+
+
+#--******************************************************************************
+# Masks and qualifiers for error report macros in OHA for FIR Error reporting
+#--******************************************************************************
+
+# TODO: add new dials
+
+### These determine if the bits are visible at all to both SCOM and the FIR error reporting structure
+# Make only these visible:
+# 2 - Activity count overflow
+# 9 - AISS hang
+# 12 - Fmax < Fmin
+# 13 - Thermal trip 0
+# 14 - Thermal trip 1
+# 15 - PCB Error
+#####
+
+# set the SCOM fence mask for sleep mode to fence all core rings ##
+ispy EXP.TP.ECO_DOM.EPS.PSC.RING_FENCE_ENABLE_MASK_Q[when=L] {
+        spyv ;
+        0x0039;
+}
+
+
+#--******************************************************************************
+# Setup For Activity Proxy Calculation
+#--******************************************************************************
+
+#ispy EXP.TP.ECO_DOM.OHA.ACTIVITY_SCALE_FACTOR_ARRAY[when=L] {
+#        spyv ;
+#        0x749184f589ddee ;
+#}
+#
+#ispy EXP.TP.ECO_DOM.OHA.ACTIVITY_SCALE_SHIFT_FACTOR_ARRAY  [when=L] {
+#        spyv ;
+## TODO: fix value once characterization is done
+#        0b010101011000001101001010000000000000000000 ;
+#}
+
+##TODO: Check and remove
+# Ralf Maier 2011/08/08
+#espy EXP.TP.ECO_DOM.OHA.ENABLE_ACTIVITY_SAMPLING [when=L] {
+#	spyv ;
+#	ON ;
+#}
+
+##TODO: Check and remove
+# Ralf Maier 2011/08/08
+#espy EXP.TP.ECO_DOM.OHA.ACTIVITY_SAMPLE_L2L3_ENABLE [when=L] {
+#        spyv ;
+#        ON ;
+#}
+#espy EXP.TP.ECO_DOM.OHA.CORE_ACTIVITY_SAMPLE_ENABLE [when=L] {
+#        spyv ;
+#        ON ;
+#}
+
+#--******************************************************************************
+# Weights for Activity Proxy Calculation
+#--******************************************************************************
+
+##TODO: Check same values for VDD and VCS?? Common component for VDD/VCS (tpc_ch_act_calc_comp.vhdl)
+# Ralf Maier 2011/08/08
+#
+# start of Vdd Section
+#ispy EXP.TP.ECO_DOM.OHA.L2_VCS_DIRECTORY_READ_WEIGHT [when=L] {
+#        spyv ;
+#        0xff ;
+#}
+#
+#ispy EXP.TP.ECO_DOM.OHA.L2_VCS_DIRECTORY_WRITE_WEIGHT [when=L] {
+#        spyv ;
+#        0xff ;
+#}
+#
+#ispy EXP.TP.ECO_DOM.OHA.L2_VCS_CACHE_FULL_READ_WEIGHT [when=L] {
+#        spyv ;
+#        0x23 ;
+#}
+
+#ispy EXP.TP.ECO_DOM.OHA.L2_VCS_CACHE_TARGETED_READ_WEIGHT [when=L] {
+#        spyv ;
+#        0x00 ;
+#}
+#
+#ispy EXP.TP.ECO_DOM.OHA.L2_VCS_CACHE_WRITE_CNT_WEIGHT [when=L] {
+#        spyv ;
+#        0x06 ;
+#}
+#
+#ispy EXP.TP.ECO_DOM.OHA.L3_VCS_DIRECTORY_READ_WEIGHT [when=L] {
+#        spyv ;
+#        0x66 ;
+#}
+#
+#ispy EXP.TP.ECO_DOM.OHA.L3_VCS_DIRECTORY_WRITE_WEIGHT [when=L] {
+#        spyv ;
+#        0x00 ;
+#}
+#
+#ispy EXP.TP.ECO_DOM.OHA.L3_VCS_CACHE_ACCESS_WEIGHT [when=L] {
+#        spyv ;
+#        0xb4 ;
+#}
+# end of Vdd Section
+
+# TODO: add Vcs Section
+
+
+#--******************************************************************************
+#-- TRACE
+#--******************************************************************************
+
+
+#--******************************************************************************
+#-- THERM/CPM
+#--******************************************************************************
+
+# SW237510
+# set DTS tune bits
+ispy dts_tunebits_ex [when=L && ((PU_CHIP_TYPE == NAPLES) || ((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv ;
+  0b1010;
+}
+
+# Work around for the reset on read issue to always have ACK turned on.
+
+ ispy EXP.L3.L3SENSE.LCB_1TO1_GEN.SSSAMPLER.C_SSSAMPLER_LEAF.FORCE_CPM_CLK [when=L]  {
+         spyv ;
+         0b1;
+}
+
+ ispy EXP.EC.LS.LSSSENS.LCB_2TO1_GEN.SSSAMPLER.C_SSSAMPLER_LEAF.FORCE_CPM_CLK [when=L]  {
+         spyv ;
+         0b1;
+}
+
+ ispy EXP.EC.FX_LATCHES.THERMALSENSOR.LCB_2TO1_GEN.SSSAMPLER.C_SSSAMPLER_LEAF.FORCE_CPM_CLK [when=L]  {
+         spyv ;
+         0b1;
+}
+
+ ispy EXP.EC.SD.SDSS.LCB_2TO1_GEN.SSSAMPLER.C_SSSAMPLER_LEAF.FORCE_CPM_CLK [when=L]  {
+         spyv ;
+         0b1;
+}
+
+# Force Reset on Read to be ON
+
+ espy EXP.L3.L3SENSE.CPM_GENERATE.P_CPM_GENERATE.NEST_CPM_GENERATE.CPM.RESET_ON_READ_ENABLE [when=L]  {
+         spyv ;
+         ON;
+}
+
+ espy EXP.EC.LS.LSSSENS.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.RESET_ON_READ_ENABLE [when=L]  {
+         spyv ;
+         ON;
+}
+
+ espy EXP.EC.FX_LATCHES.THERMALSENSOR.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.RESET_ON_READ_ENABLE [when=L]  {
+         spyv ;
+         ON;
+}
+
+ espy EXP.EC.SD.SDSS.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.RESET_ON_READ_ENABLE [when=L]  {
+         spyv ;
+         ON;
+}
+
+# Settings for ALL Venice and Murano DD2 or higher
+
+ espy EXP.EC.LS.LSSSENS.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.HALF_FREQ_DISABLE [when=L && ((PU_CHIP_TYPE == NAPLES) || (PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))] {
+         spyv ;
+         ON;
+}
+
+ espy EXP.EC.FX_LATCHES.THERMALSENSOR.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.HALF_FREQ_DISABLE [when=L && ((PU_CHIP_TYPE == NAPLES) || (PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))] {
+         spyv ;
+         ON;
+}
+
+ espy EXP.EC.SD.SDSS.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.HALF_FREQ_DISABLE [when=L && ((PU_CHIP_TYPE == NAPLES) || (PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))] {
+         spyv ;
+         ON;
+}
+
+ espy EXP.EC.LS.LSSSENS.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.HALF_FREQ_INIT [when=L && ((PU_CHIP_TYPE == NAPLES) || (PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))] {
+         spyv ;
+         ON;
+}
+
+ espy EXP.EC.FX_LATCHES.THERMALSENSOR.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.HALF_FREQ_INIT [when=L && ((PU_CHIP_TYPE == NAPLES) || (PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))] {
+         spyv ;
+         ON;
+}
+
+ espy EXP.EC.SD.SDSS.CPM_GENERATE.P_CPM_GENERATE.CORE_CPM_GENERATE.CPM.HALF_FREQ_INIT [when=L && ((PU_CHIP_TYPE == NAPLES) || (PU_CHIP_TYPE == VENICE) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x20)))] {
+         spyv ;
+         ON;
+}
+
+# This activates dts2:
+
+#ispy EXP.TP.ECO_DOM.EPS.THERM.THERM_DTS_ENABLE_L1 [when=L]  {
+#        spyv ;
+#        0b111;
+#}
+#
+#ispy EXP.TP.ECO_DOM.EPS.THERM.THERM_DTS_ENABLE_L2 [when=L]  {
+#        spyv ;
+#        0b1;
+#}
+
+# Enable Sampling via TOD Hang Pulse
+
+# gone in P8
+# espy EXP.TP.ECO_DOM.THERM.THERM_DTS2_SAMPLE_ENA [when=L]  {
+#        spyv ;
+#        ON;
+#}
+
+# Setup Sample Rate, each 2.5 ms:
+
+#ispy EXP.TP.ECO_DOM.EPS.THERM.THERM_SAMPLE_PULSE_CNT [when=L]  {
+#        spyv ;
+#        0b0101;
+#}
+
+#### Thermal Trips
+# setting 120C (115+5) = fatal, 112C (107 + 5) as critical, and 110C (105+5) as a warning
+# so we can make sure TPMD is not doing anything stupid
+# all but critical will be masked for manufacturing and field, but checktop in lab
+
+# EXP TRIP
+## Workaround for thermal throttling on critical trip HW072173
+# gone  in P8
+# ispy EXP.TP.ECO_DOM.THERM.THERM_THRES_TRIP_ENA0 [when=L]  {
+#        spyv ;
+#        0b101;
+#
+
+#ispy EXP.TP.ECO_DOM.EPS.THERM.TRIP_LEVEL_CRITICAL [when=L]  {
+#        spyv ;
+#	0x70;
+#}
+#ispy EXP.TP.ECO_DOM.EPS.THERM.TRIP_LEVEL_FATAL [when=L]  {
+#        spyv ;
+#	0x78;
+#}
+
+#ispy EXP.TP.ECO_DOM.EPS.THERM.TRIP_LEVEL_WARNING [when=L]  {
+#        spyv ;
+#	0x6e;
+#}
+
+# mask dts overflow during calibration
+# Step 1c: Add an 9 bit signed "offset" b. Overflow detection when bit 0 or 1 = '1'
+#espy EXP.TP.ECO_DOM.EPS.THERM.OVERFLOW_ERR_MASK  [when=L] {
+# spyv ;
+# ON ;
+#}
+
+# dts_power_up_cnt (value * 32 * by cycle = 8 * 32 * 1000 ps = 256 ns):
+# seems to be gone in P8
+# ispy EXP.TP.ECO_DOM.THERM.DTS_POWER_UP_CNT [when=L]  {
+#         spyv ;
+#         0b01000;
+# }
+# ispy EXP.TP.ECO_DOM.C1_CPMDTS.SSS.DTS_POWER_UP_CNT [when=L]  {
+#         spyv ;
+#         0b01000;
+# }
+
+# sweep_length_cnt (value * 32 * by cycle = 8 * 32 * 1000 ps = 256 ns):
+
+
+# seems to be gone in P8
+# ispy EXP.TP.ECO_DOM.C1_CPMDTS.SSS.SWEEP_LENGTH_CNT [when=L]  {
+#         spyv ;
+#         0b01000;
+# }
+
+# THERM_DTS_SWEEP_CNT  = (8 * SAMPLER_SWEEP_LEN_CNT)+1;
+# seems to be gone in P8
+# ispy EXP.TP.ECO_DOM.THERM.DTS_SWEEP_CNT [when=L]  {
+#        spyv ;
+#        0b01000001;
+# }
+
+# Init Values for CPM function in therm macro:
+
+#ispy EXP.TP.ECO_DOM.EPS.THERM.THERM_CPM_ENABLE_L1 [when=L]  {
+#        spyv ;
+#        0b111;
+#}
+#
+#ispy EXP.TP.ECO_DOM.EPS.THERM.THERM_CPM_ENABLE_L2 [when=L]  {
+#        spyv ;
+#        0b1;
+#}
+
+
+### Required for CPMs to work properly but never made it into inits before now
+#espy  EXP.L3.L3SENSE.CPM_GENERATE.P_CPM_GENERATE.CPM.RESET_ON_READ_ENABLE  [when=L] {
+#      spyv;
+#      ON;
+#}
+
+# to be fixed (TG)
+# espy EXP.L3.L3SENSE.CPM_GENERATE.CPM.STATIC_PATH_DELAY_CTRL [when=L] {
+#      spyv;
+#      DELAY01;
+#}
+

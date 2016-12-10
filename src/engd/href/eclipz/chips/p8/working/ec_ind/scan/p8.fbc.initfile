@@ -1,0 +1,356 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 1
+
+
+#--******************************************************************************
+#-- Murano DD1 workarounds
+#--******************************************************************************
+
+# HW235446: adjust default reflected command/response trace compression settings
+
+# sn0a/sn1a
+ispy EH.TPC.TR(2,5).DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L] {
+  bits,   spyv;
+  0:63,   0xFE03F00001C00000; # include valid, ticket, ttag(0:5) = node/chip ID, scope
+  64:87,  0x000000;
+}
+
+# sn0b
+ispy EH.TPC.TR3.DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L] {
+  bits,   spyv;
+  0:63,   0xFFFFFFFFF001F800; # exclude pbh_pbixx_pb_init, pbh_cmd_arb_enable, cmd0_central_arb
+  64:87,  0x0000F0;
+}
+
+# sn1b
+ispy EH.TPC.TR6.DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L] {
+  bits,   spyv;
+  0:63,   0xFFFF800000000000; # exclude cmd1_central_arb
+  64:87,  0x000FFF;
+}
+
+# cr0/cr1
+ispy EH.TPC.TR(4,7).DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L] {
+  bits,   spyv;
+  0:63,   0x7FE0FC0000000000; # include snoop_valid, scope, ticket, ttag(0:5) = node/chip ID
+  64:87,  0x0001C0;
+}
+
+# HW242181 - adjustment to flush state required to match ship mode defaults
+
+espy EH.PB.CMD.PB_CFG_CHG_RATE_CRESP_SAMPLE_EN [when=L && ((ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE)))] {
+  spyv;
+  ON;
+}
+
+espy EH.PB.CMD.PB_CFG_CHG_RATE_SLOW_RETURN [when=L && ((ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE)))] {
+  spyv;
+  ON;
+}
+
+# enable multiple HPC checking, with the expectation that AS will not be used
+# this requires scan inits to remove the masks in Mur/Venice DD2+ (to undo the design scan flush changes!)
+espy ES.PBES_WRAP_TOP.PBES_TOP.RSP.RH_PR(0,1)_A0.C_ERR_RPT__MULT_HPC_ERROR_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))))]{
+#||(PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+espy ES.PBES_WRAP_TOP.PBES_TOP.RSP.RH_PR(0,1)_A1.C_ERR_RPT__MULT_HPC_ERROR_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))))]{ 
+#|| (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+espy ES.PBES_WRAP_TOP.PBES_TOP.RSP.RH_PR(0,1)_A2.C_ERR_RPT__MULT_HPC_ERROR_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))))]{
+#|| (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+espy ES.PBES_WRAP_TOP.PBES_TOP.RSP.LMS_PR(0,1).ERR_B0_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))))]{
+# || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+espy ES.PBES_WRAP_TOP.PBES_TOP.RSP.LFM0_PR(0,1).ERR_B0_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))))]{
+# || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+espy ES.PBES_WRAP_TOP.PBES_TOP.RSP.LFM1_PR(0,1).ERR_B0_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))))]{
+# || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+espy EN.PB.PBEN.RSP.LM_(0,1)_FIFO.ERR_B0_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+espy EN.PB.PBEN.RSP.NM_(0,1)_FIFO.ERR_B0_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+espy EH.PB.CMD.PB_CFG_P7_SLEEP_BACKOFF [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  BACKOFF_1K;
+}
+
+espy EN.PB.PBEN.CMD.PB_CFG_OC_EARLY_EXP_TIME [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  CNT_3;
+}
+
+espy ES.PBES_WRAP_TOP.PBES_TOP.CMD.PB_CFG_OC_EARLY_EXP_TIME [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  CNT_3;
+}
+
+espy EN.PB.PBEN.CMD.PB_CFG_OC_EXPIRATION_TIME [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  CNT_8;
+}
+
+espy ES.PBES_WRAP_TOP.PBES_TOP.CMD.PB_CFG_OC_EXPIRATION_TIME [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  CNT_8;
+}
+
+ispy EN.PB.PBEN.CMD.PB_CFG_COMMIT_Q_EXPIRATION_TIME [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0b1100;
+}
+
+ispy ES.PBES_WRAP_TOP.PBES_TOP.CMD.PB_CFG_COMMIT_Q_EXPIRATION_TIME [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  0b1100;
+}
+
+ispy EH.PB.PBIEX01.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX02.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX03.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX04.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX05.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX06.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX09.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX10.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX11.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX12.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX13.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L] {
+  spyv;
+  0b11010;
+}
+
+ispy EH.PB.PBIEX14.EH.INIT_I2C_SND_CTL.CFG_CPU_DELAY_HALF_SPEED [when=L] {
+  spyv;
+  0b11010;
+}
+
+# JJM: approved in 7/10/13 CCB as initfile changes (no logic change)
+espy EH.PB.RSP.CR(0,1)_ARB.CHSW_X_CREDITS [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  CHSW_ROUND_ROBIN_X_CREDITS;
+}
+
+# HW272095
+espy EH.PB.RSP.CR(0,1)_ARB.CHSW_REVERT_TO_ORIG_X_CREDITS [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+  spyv;
+  CHSW_REVERT_TO_ORIG_X_CREDITS;
+}
+
+espy EH.PB.RSP.CR(0,1)_ARB.CHSW_PB_CFG_GP_TIMEOUT [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  11_TIMES;
+}
+
+espy EH.PB.CMD.PB_CFG_STARVATION_OC_RATIO [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  DISABLED;
+}
+
+# HW245373
+espy EH.PB.PBIEX01.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX02.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX03.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX04.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX05.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX06.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX09.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX10.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX11.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L && ((PU_CHIP_TYPE == VENICE) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX12.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX13.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+espy EH.PB.PBIEX14.EH.INIT_I2C_SND_CTL.CFG_WAKEUP_DLY [when=L] {
+  spyv;
+  WAKEUP_DLY_16;
+}
+
+# SW260449 -- updates to ship mode Brazos fabric configuration
+espy EH.PB.CMD.PB_CFG_DIRECT_STARVE_INJECT_IN_CA_HP [when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) ||  (PU_CHIP_TYPE == NAPLES)) ] {
+  spyv;
+  LFSR_1_8;
+}
+
+espy EH.PB.CMD.PB_CFG_DIRECT_STARVE_INJECT_IN_CA_LP [when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) ||  (PU_CHIP_TYPE == NAPLES)) ] {
+  spyv;
+  LFSR_1_8;
+}
+
+espy EH.PB.CMD.PB_CFG_IGNORE_CMD_SLOT_FOR_STARVE_DISABLE [when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) ||  (PU_CHIP_TYPE == NAPLES)) ] {
+  spyv;
+  FUNCTION_DISABLED;
+}
+
+# SW286854
+espy EH.PB.DAT.HW245007_DISABLE [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  DISABLE;
+}
+
+# SW306389 - XBUS/ABUS TOD step checker can erroneously cause a checkstop 
+espy EN.PB.PBEN.IOX0.IOX.FMR.TOD_OVERLAP_ERR_RPT_MASK [when=L && ((PU_CHIP_TYPE == NAPLES) || ((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv;
+  ON;
+}
+espy EN.PB.PBEN.IOX1.IOX.FMR.TOD_OVERLAP_ERR_RPT_MASK [when=L && ((PU_CHIP_TYPE == NAPLES) || ((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv;
+  ON;
+}
+espy EN.PB.PBEN.IOX2.IOX.FMR.TOD_OVERLAP_ERR_RPT_MASK [when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv;
+  ON;
+}
+espy EN.PB.PBEN.IOX3.IOX.FMR.TOD_OVERLAP_ERR_RPT_MASK [when=L && ((PU_CHIP_TYPE == NAPLES) || ((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv;
+  ON;
+}
+espy ES.PBES_WRAP_TOP.PBES_TOP.IOA0.IOA.FMR.TOD_ERR_RPT_MASK [when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv;
+  ON;
+}
+espy ES.PBES_WRAP_TOP.PBES_TOP.IOA1.IOA.FMR.TOD_ERR_RPT_MASK [when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv;
+  ON;
+}
+espy ES.PBES_WRAP_TOP.PBES_TOP.IOA2.IOA.FMR.TOD_ERR_RPT_MASK [when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || ((PU_CHIP_TYPE == MURANO) && (ec >= 0x21)))] {
+  spyv;
+  ON;
+}

@@ -1,0 +1,5 @@
+# set of initfiles to process for only HBI inits
+P8_HBI_ONLY_SCAN_INITS        := p8.abus.initfile p8.dmi.initfile p8.fbc.initfile p8.as.initfile p8.mc.initfile p8.nx.initfile p8.cxa.initfile p8.pe.initfile p8.pm.initfile p8.perv.initfile p8.pbiex.initfile
+
+# set of initfiles to process for both HBI & RUNTIME inits
+P8_HBI_AND_RUNTIME_SCAN_INITS := p8.dpll.initfile p8.ec.initfile p8.l2.initfile p8.l3.initfile p8.ncu.initfile p8.fbc.ex.initfile p8.perv.ex.initfile p8.pm.ex.initfile p8.pm.core.initfile

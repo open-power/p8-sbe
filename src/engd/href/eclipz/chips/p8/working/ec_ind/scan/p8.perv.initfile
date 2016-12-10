@@ -1,0 +1,244 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 1
+
+
+#--******************************************************************************
+#-- Murano DD1 workarounds
+#--******************************************************************************
+
+# HW235448: enable trace stop on checkstop
+espy EH.TPC.EPS.DBG.INST2_COND3_ENABLE_FEND [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy EH.TPCHIP.TPC.EPS.DBG.INST2_COND3_ENABLE_FEND [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy ES.PBES_WRAP_TOP.TPC.EPS.DBG.INST2_COND3_ENABLE_FEND [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy ES.PE_WRAP_TOP.TPC.EPS.DBG.INST2_COND3_ENABLE_FEND [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy EN.PB.TPC.EPS.DBG.INST2_COND3_ENABLE_FEND [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+## SET PIB TRACE STOP ON PCB TIMEOUT FOR DEFAULT
+#ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0xFFFFFFF000000000000000;
+#}
+#
+#ispy EH.TPCHIP.TPC.EPS.DBG.INST1_COND1_SEL_A [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0b0010110;
+#}
+#
+#ispy EH.TPCHIP.TPC.EPS.DBG.INST1_C1_COUNT_LT [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0x1; 
+#}
+#
+#espy EH.TPCHIP.TPC.EPS.DBG.INST1_CHECKSTOP_MODE_SELECTOR [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  OFF;
+#}
+#
+#ispy EH.TPCHIP.TPC.EPS.DBG.INST1_CHECKSTOP_MODE_LT [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0b000;
+#}
+#
+#ispy EH.TPCHIP.TPC.EPS.DBG.INST1_CONDITION1_ACTION_DO [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0b10;
+#}
+# 
+#ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKA [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0xffffff;
+#}
+#
+#ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKB [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0xffffff;
+#}
+#
+#ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKC [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0xffff1f;
+#}
+# 
+#ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKD [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0xffffff;
+#}
+#
+#ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.PATTERNC [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0x0000e0;
+#}
+#
+#ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.PATTERND [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0x000000;
+#}
+#
+#espy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCHC_MUXSEL [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  BITS_48_TO_71;
+#}
+#
+#espy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCHD_MUXSEL [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  BITS_72_TO_87_Z8;
+#}
+#  
+#ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.TRIG0_OR_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+#  spyv;
+#  0b0010;
+####}
+
+# SET PIB TRACE STOP ON PCB TIMEOUT FOR DEFAULT
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.COMPRESSION_CARE_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0xFFFFFFFFFFFFFFFFFFE1F0;
+}
+
+ispy EH.TPCHIP.TPC.EPS.DBG.INST1_COND1_SEL_A [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b0010110;
+}
+
+ispy EH.TPCHIP.TPC.EPS.DBG.INST1_C1_COUNT_LT [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0x1; 
+}
+
+espy EH.TPCHIP.TPC.EPS.DBG.INST1_CHECKSTOP_MODE_SELECTOR [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+ispy EH.TPCHIP.TPC.EPS.DBG.INST1_CHECKSTOP_MODE_LT [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b000;
+}
+
+espy EH.TPCHIP.TPC.EPS.DBG.INST1_EDGE_TRIGGER_MODE1 [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  OFF;
+}
+
+ispy EH.TPCHIP.TPC.EPS.DBG.INST1_CONDITION1_ACTION_DO [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b00;
+}
+ 
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKA [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0xff0000;
+}
+
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKB [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0x00ffff;
+}
+
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKC [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0xffffff;
+}
+ 
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MASKD [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0xffffff;
+}
+
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.PATTERNA [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0x004132;
+}
+
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.PATTERNB [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0xa10000;
+}
+
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.PATTERNC [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0x0000e0;
+}
+
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.PATTERND [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0x000000;
+}
+
+espy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCHA_MUXSEL [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  BITS_00_TO_23;
+}
+
+espy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCHB_MUXSEL [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  BITS_24_TO_47;
+}
+
+espy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCHC_MUXSEL [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  BITS_48_TO_71;
+}
+
+espy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.MATCHD_MUXSEL [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  BITS_72_TO_87_Z8;
+}
+  
+ispy EH.TPCHIP.TPC.TRA.TR.DLBS.LEAF.COMP.TRIG0_OR_MASK [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0b1100;
+}
+
+espy EH.TPCHIP.TPC.EPS.DBG.STOP_ON_RECOV_ERR_SELECTION [when=L && (((ec >= 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  ON;
+}

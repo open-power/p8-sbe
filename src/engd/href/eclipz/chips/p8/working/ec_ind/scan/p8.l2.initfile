@@ -1,0 +1,230 @@
+#-- IBM_PROLOG_BEGIN_TAG
+#-- This is an automatically generated prolog.
+#--
+#-- OpenPOWER Project
+#--
+#-- Contributors Listed Below - COPYRIGHT 2012,2016
+#-- [+] International Business Machines Corp.
+#--
+#--
+#-- Licensed under the Apache License, Version 2.0 (the "License");
+#-- you may not use this file except in compliance with the License.
+#-- You may obtain a copy of the License at
+#--
+#--     http://www.apache.org/licenses/LICENSE-2.0
+#--
+#-- Unless required by applicable law or agreed to in writing, software
+#-- distributed under the License is distributed on an "AS IS" BASIS,
+#-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+#-- implied. See the License for the specific language governing
+#-- permissions and limitations under the License.
+#--
+#-- IBM_PROLOG_END_TAG
+
+
+
+
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 1
+
+
+#--******************************************************************************
+#-- Naples config
+#--******************************************************************************
+# turn forces L2 to predict system pump, so L2 will go node pump -> then system pump
+# doing this allows dcbz and dclaims to do group pump -> system pump instead of starting off system pump if we disable group pump all together.
+espy  EXP.L2.L2_DBLPMP_FRC_GLB_EN [ when=L && (PU_CHIP_TYPE == NAPLES) && (IPLMODE == RUNTIME)] {
+  spyv;
+  ON;
+}
+
+#--******************************************************************************
+#-- Murano DD1 workarounds
+#--******************************************************************************
+
+# HW223805 (mpalog early termination bug after last RC dispatch)
+# ONLY FOR MURANO DD1; this was fixed in venice dd1
+espy EXP.L2.L2MISC.L2CERRS.MPALOG_ABORT_MODE [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+     spyv;
+     SERIALIZED;
+}
+
+# Murano DD1 workaround for HW225025: will be fix in Ven DD1
+ispy EXP.L2.L2SN.L2PBARB.L2_MCFP_SNPFILT_ON_THRESHOLD [when=L && (IPLMODE == RUNTIME) && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  0x1;
+}
+ispy EXP.L2.L2SN.L2PBARB.L2_MCFP_SNPFILT_OFF_THRESHOLD [when=L && (IPLMODE == RUNTIME) && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  0x0;
+}
+
+#  fixes i-prefetch vs store gather hang HW239654 (Venice and Murano DD1)
+espy EXP.L2.L2CIU.L2CICTL.L2_IPF_MRU_DONT_STALL_STQ [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+
+# Murano DD1 workaround for HW24773: bk_flush deadlocks vs RC_Ig and rsv = 1
+espy EXP.L2.L2RC.L2RCEAD.L2_RCEAD_CFG_RC_FRC_BK_FLUSH_TO_BK_EN [when=L && (PU_CHIP_TYPE == MURANO) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+# HW247822 STQ Venice DD10 workaround:  hang poll state machine not idling, bad bank usage
+espy EXP.L2.L2SQ.CTL.L2SQCTL.L2_STQ_SEQMDD1_STORE_HANG_DET_DIS [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+espy EXP.L2.L2SQ.CTL.L2SQCTL.L2_STQ_SEQMDD1_PURGE_HANG_DET_DIS [when=L && (PU_CHIP_TYPE == VENICE) && (ec < 0x20)] {
+  spyv;
+  ON;
+}
+
+# HW247666 Murano DD1 / Venice DD1.0 workaround : TLBIE snoop timeout (2 HPCS, DCBFG)
+espy EXP.L2.L2SQ.CTL.L2SQCTL.L2_DCBF_GLB_DIS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+
+#HW247034 P8 Lab Tuleta: (fixed MurDD2) Cache arb stall mechanism for CIU ops fails to reset and causes nest hang
+ 
+ispy EXP.L2.L2ARB.L2CACTL.CFG_STALL_LIMIT_CIU_DISP [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+    spyv;
+    0b11111;
+}
+
+
+#HW246664 HA/MP vs L2 CO vs L3 CI Deadlock Workaround: disable some L2 RC machines 
+espy EXP.L2.L2RC.L2RCDSP.L2_RCDSP_CFG_RCX_ST_DIS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  RCS_ACTIVE_EQ05;
+}
+
+espy EXP.L2.L2RC.L2RCDSP.L2_RCDSP_CFG_RCX_LD_DIS [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  RCS_ACTIVE_EQ05;
+}
+
+# Workaround for HW256886
+espy EXP.L2.L2CIU.L2CICTL.L2_USE_LFSR_FOR_STG2 [when=L && (ec < 0x20) && ((PU_CHIP_TYPE == MURANO) || (PU_CHIP_TYPE == VENICE))] {
+  spyv;
+  ON;
+}
+# turn on L2 retry back-off mechanism 
+espy  EXP.L2.L2RC.L2F2CTL.L2_F2CTL_CFG_RC_SEQVDD1_MSTR_RTY_BACKOFF_EN [ when=L && (((PU_CHIP_TYPE == VENICE)  && (ec >= 0x20)) || (PU_CHIP_TYPE == NAPLES)) ] {
+  spyv;
+  ON;
+}
+ispy  EXP.L2.L2RC.L2F2CTL.L2_F2CTL_CFG_SEQVDD1_GP_RTY_BACKOFF_MAX_LVL_CNT [ when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || (PU_CHIP_TYPE == NAPLES)) ] {
+  spyv;
+  0x4;
+}
+
+ispy  EXP.L2.L2RC.L2F2CTL.L2_F2CTL_CFG_SEQVDD1_SP_RTY_BACKOFF_MAX_LVL_CNT [ when=L && (((PU_CHIP_TYPE == VENICE) && (ec >= 0x20)) || (PU_CHIP_TYPE == NAPLES))] {
+  spyv;
+  0x4;
+}
+
+# Enable L3 addr HASH
+espy EXP.L2.L2MISC.L2CERRS.CFG_HASH_L3_ADDR_EN [ when=L  && (IPLMODE == RUNTIME) && (avpTestCase != AVP_L2) ] {
+    spyv;
+    ON;
+}
+#--******************************************************************************
+#-- Cache-contained customization
+#--******************************************************************************
+
+# Trash mode init
+espy EXP.L2.L2_RUN_MODE [when=L] {
+     spyv,               expr;
+     TRASH_MODE,         (avpTestCase == AVP_L2);
+}
+
+espy EXP.L2.L2RC.L2RCEAD.L2_RCEAD_CFG_RC_TRANS_DIS [when=L] {
+     spyv,               expr;
+     ON,                 (avpTestCase == AVP_L2);
+}
+
+#--******************************************************************************
+#-- Runtime customization
+#--******************************************************************************
+
+espy EXP.L2.L2MISC.L2CERRS.CFG_CAC_ERR_REPAIR_EN [when=L && (IPLMODE == RUNTIME) && (avpTestCase != AVP_L2)] {
+     spyv;
+     ON;
+}
+
+#--******************************************************************************
+#-- Static customization
+#--******************************************************************************
+
+# Workaround for HW275040 L2's LLAT tracing of L3PF ttypes incorrectly setting llat_ld_not_st = store(should be load)
+# Problem with L3pf ttypes in all Murano DD1.x and DD2.x and Venice DD1.x. Logic fixed in Venice DD2.0 but we still want
+# to not include L3pf ttypes in the LLAT trace by default so dial is set to ON all the time.
+espy EXP.L2.L2RC.L2RCDSP.L2_RCDSP_CFG_LLAT_REQ_TRIG_INCL_L3PF_DIS [when=L && (IPLMODE == RUNTIME)] {
+  spyv;
+   ON;
+}
+
+# revert to P7 lwsync behavior
+espy EXP.L2.L2RC.L2NCCTL.L2_NCCTL_CFG_LWSYNC_ON_NCU_EN [when=L] {
+   spyv;
+   ON;
+}
+
+# hang pulse setup
+# early
+ispy EXP.L2.L2MISC.L2CERRS.HANG_POLL_PULSE_DIV [when=L] {
+    spyv;
+    0b0001; # 1
+}
+
+# late
+ispy EXP.L2.L2MISC.L2CERRS.DATA_POLL_PULSE_DIV [when=L] {
+    spyv;
+    0b0100; # 4
+}
+
+# Inits to lock address
+espy EXP.L2.L2RC.L2RCEAD.L2_RCEAD_CFG_HANG_ON_ADRERR_EN [when=L && RISK_LEVEL==0x100] {
+     spyv;
+     ON;
+}
+
+# L2 FIR Action Register Decodes:
+# (Action0, Action1, Mask)
+# ------------------------
+# (0,0,0) = Checkstop
+# (0,1,0) = Recoverable
+# (1,0,0) = Reserved
+# (1,1,0) = Local (Core) Checkstop / freeze
+# (x,x,1) = MASKED
+
+ispy EXP.L2.L2MISC.L2CERRS.FIR_ACTION0_REG [when=L] {
+    spyv,               expr;
+    0x0000000000000000, (avpTestCase == AVP_L2);
+    0x0000000000000000, any;
+}
+
+ispy EXP.L2.L2MISC.L2CERRS.FIR_ACTION1_REG [when=L] {
+    spyv,               expr;
+    0x0000000000000000, (avpTestCase == AVP_L2);
+    0xC29C188000000000, any;
+}
+
+ispy EXP.L2.L2MISC.L2CERRS.FIR_MASK_REG [when=L] {
+    spyv,               expr;
+    0x0000000000000000, (avpTestCase == AVP_L2);
+    0x3C20057FFFFFC000, any;
+}
+
+# mask LRU read error c_err_rpts (SW331543) to prevent LRU error from triggering L2 FIR[14]
+ispy EXP.L2.L2MISC.L2CERRS.ERR_RPT_MASK [when=L] {
+    bits,  spyv;
+    50:51, 0b11;
+}
